@@ -30,7 +30,6 @@ app.use(function(req, res, next) {
   // res.on('close', function(){
   //   console.log('res.locals=', res.locals.products);
   // });
-
   res.locals.fullUrl = {
     protocol: req.protocol,
     host: req.get('host'),
