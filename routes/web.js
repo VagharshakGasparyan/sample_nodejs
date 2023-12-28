@@ -1,7 +1,9 @@
 const express = require('express');
 const {DB} = require("../components/db");
 const router = express.Router();
+const { Op } = require("sequelize");
 const {User, Product} = require("../models");
+const {normalizeTypes} = require("express/lib/utils");
 
 /* GET home page. */
 router.get('/', (req, res, next) => {
@@ -18,7 +20,11 @@ router.get('/products', async (req, res, next) => {
     // console.log(user.id);
     let products = [];
     try {
-        products = await Product.findAll({limit: 10});
+        products = await Product.findAll({
+            limit: 20,
+            where:{brand_id: {[Op.not]:null }},
+            order: [['id', 'ASC']]
+        });
         // const jane = await User.create({ first_name: "Jane", last_name: "Doe", email: "johnDoe@gmail.com" });
     }catch (e) {
         console.log('error=', e);

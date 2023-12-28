@@ -16,3 +16,9 @@ npm i sequelize-cli
 npx sequelize-cli init
 npx sequelize-cli db:migrate
 ```
+```
+npx sequelize-cli seed:generate --name products-seeder
+npx sequelize-cli db:seed:all
+npx sequelize-cli db:seed:undo
+npx sequelize-cli db:seed:undo:all
+```

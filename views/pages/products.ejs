@@ -5,12 +5,16 @@
     <div><%= fullUrl.host %></div>
     <div><%= fullUrl.path %></div>
     <div><%= JSON.stringify(fullUrl.query) %></div>
+
     <% (locals.products ?? []).forEach((product)=>{ %>
         <div class="pr-id">id=<%= product.id %></div>
         <div>slug=<%= product.slug %></div>
         <div>name=<%= product.getName() %></div>
         <div>stock=<%= product.stock %></div>
-        <div><%- '<span style="color: chocolate">ABC</span>' %></div>
+        <div>brand id=<%= product.brand_id %></div>
+        <div>image=<%= product.image %></div>
+        <img src="<%= '/' + product.image %>" alt="no image" style="max-width: 256px">
+<!--        <div><%- '<span style="color: chocolate">ABC</span>' %></div>-->
         <hr>
     <% }) %>
 </section>
