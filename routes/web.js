@@ -11,6 +11,7 @@ router.get('/', (req, res, next) => {
     res.render('pages/home', {title: 'Home', page:'home'});
 });
 router.get('/products', async (req, res, next) => {
+    // qwerty
     // res.location('/login');
     // res.get('location');
     // res.redirect('/about');
@@ -19,7 +20,8 @@ router.get('/products', async (req, res, next) => {
     // console.log(User.);
     // const user = new User({ id: 1 });
     // console.log(user.id);
-    console.log(bcrypt.compareSync('qwerty', '$2b$08$anjueAN9I.ROPfygoSbF2uyqSvpFhwW/ZpIXXgqvG0fd4kTnGAMPa'));
+    // console.log(bcrypt.compareSync('qwerty', '$2b$08$anjueAN9I.ROPfygoSbF2uyqSvpFhwW/ZpIXXgqvG0fd4kTnGAMPa'));
+
     let products = [];
     try {
         products = await Product.findAll({

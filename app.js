@@ -1,9 +1,38 @@
 const createError = require('http-errors');
 const express = require('express');
 const path = require('node:path');
+const fs = require('node:fs');
 const cookieParser = require('cookie-parser');
-const logger = require('morgan');
-
+// const logger = require('morgan');
+//---------------------winston logger-begin---------------------------------------------
+const winston = require('winston');
+// Создайте логгер с несколькими транспортами (куда записывать логи)
+const log = winston.createLogger({
+  level: 'info', // уровень логирования
+  format: winston.format.simple(), // формат вывода
+  transports: [
+    // new winston.transports.Console(), // вывод в консоль
+    new winston.transports.File({ filename: 'logfile.log' }) // вывод в файл
+  ]
+});
+// logger1.info('Это информационное сообщение.');
+// logger1.warn('Это предупреждение.');
+// logger1.error('Это сообщение об ошибке.');
+process.on('uncaughtException', (err) => {
+  // Запись ошибки в лог
+  let d = new Date();
+  let fd = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
+  // console.log(err);
+  log.error(fd + '\n' + err.stack + '\n\n');
+  // Дополнительно можно выполнять другие действия, например, завершить процесс
+  process.exit(1);
+});
+process.on('exit', (code) => {
+  // console.log(`Процесс завершен с кодом: ${code}`);
+  log.error(`${new Date()}::: Exit with code: ${code}`);
+  // process.exit(1);
+});
+//---------------------winston logger-end---------------------------------------------
 
 const webRouter = require('./routes/web');
 const apiRouter = require('./routes/api');
@@ -18,11 +47,17 @@ app.set('view engine', 'ejs');
 app.use(require('express-ejs-layouts'));
 app.set('layout', 'layouts/main');
 
-app.use(logger('dev'));
+// const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
+// // setup the logger
+// app.use(logger('combined', { stream: accessLogStream }));
+// app.use(logger('dev'));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+//--------------------------------------------------------------------
+
 //----------------------------middleware------------------------------
 app.use(function(req, res, next) {
   //res.on events: 'close', 'drain', 'error', 'finish', 'pipe', 'unpipe'
