@@ -11,7 +11,7 @@ router.get('/', (req, res, next) => {
     res.render('pages/home', {title: 'Home', page:'home'});
 });
 router.get('/products', async (req, res, next) => {
-    // qwerty
+    //qwerty
     // res.location('/login');
     // res.get('location');
     // res.redirect('/about');

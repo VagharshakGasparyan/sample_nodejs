@@ -4,6 +4,7 @@ const path = require('node:path');
 const fs = require('node:fs');
 const cookieParser = require('cookie-parser');
 // const logger = require('morgan');
+
 //---------------------winston logger-begin---------------------------------------------
 const winston = require('winston');
 // Создайте логгер с несколькими транспортами (куда записывать логи)
@@ -15,9 +16,11 @@ const log = winston.createLogger({
     new winston.transports.File({ filename: 'logfile.log' }) // вывод в файл
   ]
 });
-// logger1.info('Это информационное сообщение.');
-// logger1.warn('Это предупреждение.');
-// logger1.error('Это сообщение об ошибке.');
+// log.info('Это информационное сообщение.');
+// log.warn('Это предупреждение.');
+// log.error('Это сообщение об ошибке.');
+//process.on events: 'beforeExit', 'disconnect', 'exit', 'rejectionHandled', 'uncaughtException',
+// 'uncaughtExceptionMonitor', 'unhandledRejection', 'warning', 'message'
 process.on('uncaughtException', (err) => {
   // Запись ошибки в лог
   let d = new Date();
