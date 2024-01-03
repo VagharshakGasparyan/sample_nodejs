@@ -37,6 +37,7 @@ router.get('/products', async (req, res, next) => {
     }
     // let products = DB('SELECT * FROM `products` LIMIT 3');
     // console.log(products);
+
     res.render('pages/products', {title: 'Products', page: 'products', products: products});
 });
 router.get('/login', async (req, res, next) => {
