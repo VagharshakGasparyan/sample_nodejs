@@ -1,14 +1,16 @@
 const express = require('express');
 const {DB} = require("../components/db");
 const router = express.Router();
-const { Op } = require("sequelize");
+const {Op} = require("sequelize");
 const {User, Product} = require("../models");
 const {normalizeTypes} = require("express/lib/utils");
 const bcrypt = require("bcrypt");
+const {query, check, validationResult, checkSchema} = require('express-validator');
+
 
 /* GET home page. */
 router.get('/', (req, res, next) => {
-    res.render('pages/home', {title: 'Home', page:'home'});
+    res.render('pages/home', {title: 'Home', page: 'home'});
 });
 router.get('/products', async (req, res, next) => {
     //qwerty
@@ -26,16 +28,39 @@ router.get('/products', async (req, res, next) => {
     try {
         products = await Product.findAll({
             limit: 20,
-            where:{brand_id: {[Op.not]:null }},
+            where: {brand_id: {[Op.not]: null}},
             order: [['id', 'ASC']]
         });
         // const jane = await User.create({ first_name: "Jane", last_name: "Doe", email: "johnDoe@gmail.com" });
-    }catch (e) {
+    } catch (e) {
         console.log('error=', e);
     }
-
     // let products = DB('SELECT * FROM `products` LIMIT 3');
     // console.log(products);
-    res.render('pages/products', {title: 'Products', page:'products', products: products});
+    res.render('pages/products', {title: 'Products', page: 'products', products: products});
 });
+router.get('/login', async (req, res, next) => {
+    res.render('pages/login', {title: 'Login', page: 'login'});
+});
+router.post('/login', async (req, res, next) => {
+    await checkSchema({
+        email: {isEmail: true},
+        password: {isLength: {options: {min: 8, max: 20}}},
+    }).run(req);
+    //await check('email', 'Username Must Be an Email Address').isEmail().run(req);
+    //await check('password').isLength({ min: 8, max: 20 }).run(req);
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        req.session.errors = {};
+        errors.array().forEach((err_item)=>{
+            req.session.errors[err_item.path] = err_item;
+        });
+        let backURL = req.header('Referer') || '/';
+        return res.redirect(backURL);
+    }
+    // console.log(req.body);
+    res.redirect('/');
+});
+
+
 module.exports = router;

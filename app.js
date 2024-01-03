@@ -4,6 +4,7 @@ const path = require('node:path');
 const fs = require('node:fs');
 const cookieParser = require('cookie-parser');
 // const logger = require('morgan');
+const session = require('express-session');
 
 //---------------------winston logger-begin---------------------------------------------
 const winston = require('winston');
@@ -59,6 +60,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({ secret: 'keyboard cat', resave: false, saveUninitialized: false, cookie: { maxAge: 60000 }}));
 //--------------------------------------------------------------------
 
 //----------------------------middleware------------------------------
@@ -67,6 +69,11 @@ app.use(function(req, res, next) {
   // res.on('close', function(){
   //   console.log('res.locals=', res.locals.products);
   // });
+  // res.locals.errors = req.locals && req.locals.errors || '';
+  // console.log('aaa1', req);
+  // console.log(req.session);
+  res.locals.errors = req.session.errors || null;
+  console.log('session=', req.session.errors);
   res.locals.fullUrl = {
     protocol: req.protocol,
     host: req.get('host'),

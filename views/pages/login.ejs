@@ -1,0 +1,30 @@
+<%- contentFor('content') %>
+<section>
+    <div>ab<%= locals.errors %>cd</div>
+    <form class="login" method="post" action="/login">
+        <h1>LOGIN</h1>
+        <label>
+            <div>User Name or email</div>
+            <input type="text" name="email">
+            <% if(locals.errors && 'email' in locals.errors) {%>
+            <div class="error"><%= locals.errors.email.msg %></div>
+            <%}%>
+        </label>
+        <label>
+            <div>Password</div>
+            <input type="password" name="password">
+            <% if(locals.errors && 'password' in locals.errors) {%>
+            <div class="error"><%= locals.errors.password.msg %></div>
+            <%}%>
+        </label>
+        <input class="submit" type="submit" value="Login">
+    </form>
+
+</section>
+
+<%- contentFor('body') %>
+<script>
+    console.log('login');
+</script>
+<%- contentFor('head') %>
+<link rel="stylesheet" href="/css/login.css" type="text/css">
