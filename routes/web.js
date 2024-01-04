@@ -6,6 +6,7 @@ const {User, Product} = require("../models");
 const {normalizeTypes} = require("express/lib/utils");
 const bcrypt = require("bcrypt");
 const {query, check, validationResult, checkSchema} = require('express-validator');
+const moment = require('moment');
 
 
 /* GET home page. */
@@ -33,17 +34,18 @@ router.get('/products', async (req, res, next) => {
         });
         // const jane = await User.create({ first_name: "Jane", last_name: "Doe", email: "johnDoe@gmail.com" });
     } catch (e) {
-        console.log('error=', e);
+        console.error('error=', e);
     }
     // let products = DB('SELECT * FROM `products` LIMIT 3');
     // console.log(products);
-
     res.render('pages/products', {title: 'Products', page: 'products', products: products});
 });
 router.get('/login', async (req, res, next) => {
+    // console.log(moment().format('yyyy_MM_DD_HH:mm:ss'));
     res.render('pages/login', {title: 'Login', page: 'login'});
 });
 router.post('/login', async (req, res, next) => {
+
     await checkSchema({
         email: {isEmail: true},
         password: {isLength: {options: {min: 8, max: 20}}},

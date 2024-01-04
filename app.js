@@ -5,37 +5,56 @@ const fs = require('node:fs');
 const cookieParser = require('cookie-parser');
 // const logger = require('morgan');
 const session = require('express-session');
+const moment = require('moment');
+const cron = require('node-cron');
 
 //---------------------winston logger-begin---------------------------------------------
 const winston = require('winston');
 // Создайте логгер с несколькими транспортами (куда записывать логи)
-const log = winston.createLogger({
-  level: 'info', // уровень логирования
-  format: winston.format.simple(), // формат вывода
-  transports: [
-    // new winston.transports.Console(), // вывод в консоль
-    new winston.transports.File({ filename: 'logfile.log' }) // вывод в файл
-  ]
+let log = null;
+const makeLog = () => {
+  let now = moment().format('yyyy_MM_DD');
+  log = winston.createLogger({
+    level: 'info', // уровень логирования
+    format: winston.format.simple(), // формат вывода
+    transports: [
+      // new winston.transports.Console(), // вывод в консоль
+      new winston.transports.File({ filename: 'logs/' + now + '.log' }) // вывод в файл
+    ]
+  });
+};
+makeLog();
+cron.schedule('0 0 * * *', () => {//running every day at 0:00
+  makeLog();
+  console.log('cron running at ' + moment().format('yyyy_MM_DD-HH:mm:ss'));
 });
 // log.info('Это информационное сообщение.');
 // log.warn('Это предупреждение.');
 // log.error('Это сообщение об ошибке.');
-//process.on events: 'beforeExit', 'disconnect', 'exit', 'rejectionHandled', 'uncaughtException',
-// 'uncaughtExceptionMonitor', 'unhandledRejection', 'warning', 'message'
-process.on('uncaughtException', (err) => {
-  // Запись ошибки в лог
-  let d = new Date();
-  let fd = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
-  // console.log(err);
-  log.error(fd + '\n' + err.stack + '\n\n');
-  // Дополнительно можно выполнять другие действия, например, завершить процесс
-  process.exit(1);
+// let processEvents = ['beforeExit', 'disconnect', 'exit', 'rejectionHandled', 'uncaughtException',
+//   'uncaughtExceptionMonitor', 'unhandledRejection', 'warning', 'message'];
+let errProcessEvents = ['uncaughtException', 'uncaughtExceptionMonitor'];
+errProcessEvents.forEach((errProcessEvent)=>{
+  process.on(errProcessEvent, (err) => {
+    log.error(moment().format('yyyy_MM_DD-HH:mm:ss') + '\n' + err.stack + '\n\n');
+    process.exit(1);
+  });
 });
-process.on('exit', (code) => {
-  // console.log(`Процесс завершен с кодом: ${code}`);
-  log.error(`${new Date()}::: Exit with code: ${code}`);
-  // process.exit(1);
+process.on('warning', (err) => {
+  log.error(moment().format('yyyy_MM_DD-HH:mm:ss') + '\n' + err.stack + '\n\n');
 });
+// process.stdout.wr = process.stdout.write;
+process.stdout.er = process.stderr.write;
+process.stderr.write = (mes, c)=>{
+  log.error(moment().format('yyyy_MM_DD-HH:mm:ss') + '\n' + mes + '\n\n');
+  process.stdout.er(mes, c);
+}
+
+// process.on('exit', (code) => {
+//   // console.log(`Процесс завершен с кодом: ${code}`);
+//   log.error(moment().format('yyyy_MM_DD-HH:mm:ss') + '\nExit with code: ' + code + '\n\n');
+//   // process.exit(1);
+// });
 //---------------------winston logger-end---------------------------------------------
 
 const webRouter = require('./routes/web');
@@ -60,7 +79,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({ secret: 'keyboard cat', resave: false, saveUninitialized: false, cookie: { maxAge: 60000 }}));
+app.use(session({ secret: 'keyboard cat', resave: true, saveUninitialized: true, cookie: { maxAge: 60000 }}));
 //--------------------------------------------------------------------
 
 //----------------------------middleware------------------------------
@@ -69,11 +88,9 @@ app.use(function(req, res, next) {
   // res.on('close', function(){
   //   console.log('res.locals=', res.locals.products);
   // });
-  // res.locals.errors = req.locals && req.locals.errors || '';
-  // console.log('aaa1', req);
-  // console.log(req.session);
   res.locals.errors = req.session.errors || null;
-  console.log('session=', req.session.errors);
+  // console.log('session=', req.session.errors);
+  delete req.session.errors;
   res.locals.fullUrl = {
     protocol: req.protocol,
     host: req.get('host'),
