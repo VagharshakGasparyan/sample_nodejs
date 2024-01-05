@@ -7,6 +7,8 @@ const {normalizeTypes} = require("express/lib/utils");
 const bcrypt = require("bcrypt");
 const {query, check, validationResult, checkSchema} = require('express-validator');
 const moment = require('moment');
+const Joi = require('joi');
+const {validate} = require('../components/validate');
 
 
 /* GET home page. */
@@ -42,27 +44,63 @@ router.get('/products', async (req, res, next) => {
 });
 router.get('/login', async (req, res, next) => {
     // console.log(moment().format('yyyy_MM_DD_HH:mm:ss'));
+    // console.log(req.session);
+    // req.session.tmbrd = {a: 'aaa', b: 'bbb'};
+
     res.render('pages/login', {title: 'Login', page: 'login'});
 });
 router.post('/login', async (req, res, next) => {
-
-    await checkSchema({
-        email: {isEmail: true},
-        password: {isLength: {options: {min: 8, max: 20}}},
-    }).run(req);
-    //await check('email', 'Username Must Be an Email Address').isEmail().run(req);
-    //await check('password').isLength({ min: 8, max: 20 }).run(req);
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        req.session.errors = {};
-        errors.array().forEach((err_item)=>{
-            req.session.errors[err_item.path] = err_item;
-        });
-        let backURL = req.header('Referer') || '/';
-        return res.redirect(backURL);
+    if(
+        !validate({
+            email: Joi.string().email().required(),
+            password: Joi.string().min(8).max(20).required()
+        }, req, res)
+    ){
+        return res.redirectBack();
+        // let backURL = req.header('Referer') || '/';
+        // return res.redirect(backURL);
     }
-    // console.log(req.body);
+
     res.redirect('/');
+    // return;
+    //
+    // const schema_joi = Joi.object({
+    //     email: Joi.string().email().required(),
+    //     password: Joi.string().min(8).max(20).required()
+    // });
+    // const joiErrors = schema_joi.validate({
+    //     email: req.body.email,
+    //     password: req.body.password,
+    // }, {abortEarly: false}).error;
+    // console.log('aaa=', joiErrors);
+    // if(joiErrors){
+    //     req.session.errors = {};
+    //     joiErrors.details.forEach((err_item)=>{
+    //         req.session.errors[err_item.path[0]] = {msg: err_item.message};
+    //     });
+    //     let backURL = req.header('Referer') || '/';
+    //     return res.redirect(backURL);
+    // }else{
+    //     return res.redirect('/');
+    // }
+    //
+    // await checkSchema({
+    //     email: {isEmail: true},
+    //     password: {isLength: {options: {min: 8, max: 20}}},
+    // }).run(req);
+    // //await check('email', 'Username Must Be an Email Address').isEmail().run(req);
+    // //await check('password').isLength({ min: 8, max: 20 }).run(req);
+    // const errors = validationResult(req);
+    // if (!errors.isEmpty()) {
+    //     req.session.errors = {};
+    //     errors.array().forEach((err_item)=>{
+    //         req.session.errors[err_item.path] = err_item;
+    //     });
+    //     let backURL = req.header('Referer') || '/';
+    //     return res.redirect(backURL);
+    // }
+    // // console.log(req.body);
+    // res.redirect('/');
 });
 
 

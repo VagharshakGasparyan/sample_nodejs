@@ -7,6 +7,7 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const moment = require('moment');
 const cron = require('node-cron');
+require('dotenv').config();
 
 //---------------------winston logger-begin---------------------------------------------
 const winston = require('winston');
@@ -88,6 +89,7 @@ app.use(function(req, res, next) {
   // res.on('close', function(){
   //   console.log('res.locals=', res.locals.products);
   // });
+  console.log(process.env.PORT);
   res.locals.errors = req.session.errors || null;
   // console.log('session=', req.session.errors);
   delete req.session.errors;
@@ -96,6 +98,10 @@ app.use(function(req, res, next) {
     host: req.get('host'),
     path: req.path,
     query: req.query,
+  };
+  let backURL = req.header('Referer') || '/';
+  res.redirectBack = ()=>{
+    return res.redirect(backURL);
   };
   next();
 });

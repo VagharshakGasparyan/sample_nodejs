@@ -18,6 +18,7 @@ npm i express-session
 npm i winston
 npm i moment
 npm i node-cron
+npm i joi
 npm i sequelize
 npm i sequelize-cli
 npx sequelize-cli init
@@ -37,3 +38,7 @@ npx sequelize-cli db:seed:undo
 npx sequelize-cli db:seed:undo --seed name-of-seed-as-in-data
 npx sequelize-cli db:seed:undo:all
 ```
+group auth middleware
+translate
+auth
+socket
