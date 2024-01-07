@@ -92,6 +92,9 @@ app.use(function(req, res, next) {
   res.locals.$old = req.session.old || {};
   req.session.old = req.body || {};
 
+  res.locals.$prevUrl = req.session.prevUrl || '';
+  req.session.prevUrl = req.url || '';
+
   // console.log('req.body=', req.body);
   res.locals.$errors = req.session.errors || {};
   delete req.session.errors;
@@ -102,7 +105,7 @@ app.use(function(req, res, next) {
     query: req.query,
     url: req.url,
   };
-  let backURL = req.header('Referer') || req.url;
+  let backURL = req.header('Referer') || req.url || '/';
   res.redirectBack = ()=>{
     return res.redirect(backURL);
   };
