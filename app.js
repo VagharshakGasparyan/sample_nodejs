@@ -89,17 +89,20 @@ app.use(function(req, res, next) {
   // res.on('close', function(){
   //   console.log('res.locals=', res.locals.products);
   // });
-  console.log(process.env.PORT);
-  res.locals.errors = req.session.errors || null;
-  // console.log('session=', req.session.errors);
+  res.locals.$old = req.session.old || {};
+  req.session.old = req.body || {};
+
+  // console.log('req.body=', req.body);
+  res.locals.$errors = req.session.errors || {};
   delete req.session.errors;
-  res.locals.fullUrl = {
+  res.locals.$fullUrl = {
     protocol: req.protocol,
     host: req.get('host'),
     path: req.path,
     query: req.query,
+    url: req.url,
   };
-  let backURL = req.header('Referer') || '/';
+  let backURL = req.header('Referer') || req.url;
   res.redirectBack = ()=>{
     return res.redirect(backURL);
   };

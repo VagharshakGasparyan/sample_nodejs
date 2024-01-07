@@ -13,6 +13,10 @@ const {validate} = require('../components/validate');
 
 /* GET home page. */
 router.get('/', (req, res, next) => {
+    // app.param('id', /^\d+$/);
+    // app.get('/user/:id', function(req, res){
+    //     res.send('user ' + req.params.id);
+    // });
     res.render('pages/home', {title: 'Home', page: 'home'});
 });
 router.get('/products', async (req, res, next) => {

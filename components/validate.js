@@ -8,7 +8,7 @@ function validate(schema, req, res) {
         newSchema[key] = req.body[key];
     }
     const joiErrors = schema_joi.validate(newSchema, {abortEarly: false}).error;
-    console.log('validate errors=', joiErrors);
+    //console.log('validate errors=', joiErrors);
     if (joiErrors) {
         req.session.errors = {};
         joiErrors.details.forEach((err_item) => {
