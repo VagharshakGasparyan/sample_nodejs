@@ -89,6 +89,7 @@ app.use(function(req, res, next) {
   // res.on('close', function(){
   //   console.log('res.locals=', res.locals.products);
   // });
+
   res.locals.$old = req.session.old || {};
   req.session.old = req.body || {};
 
