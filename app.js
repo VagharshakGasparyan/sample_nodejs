@@ -82,7 +82,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({secret: 'keyboard cat', resave: true, saveUninitialized: true, cookie: {maxAge: 2 * 60 * 60 * 1000}}));
+app.use(session({secret: 'Fb25ekS7Im', resave: true, saveUninitialized: true, cookie: {maxAge: 2 * 60 * 60 * 1000}}));
 //--------------------------------------------------------------------
 global.usersTokens = {};
 //----------------------------middleware------------------------------
@@ -91,12 +91,8 @@ app.use(async function (req, res, next) {
     // res.on('close', function(){
     //   console.log('res.locals=', res.locals.products);
     // });
-
     //----------auth user-begin------------------------------
-    res.locals.$auth = await getUserByToken(req.session.token);
-    if(res.locals.$auth){
-        console.log(res.locals.$auth.dataValues);
-    }
+    [res.locals.$auth, res.locals.$role] = await getUserByToken(req.session.token);
     console.log('global.usersTokens=', global.usersTokens);
     //----------auth user-end--------------------------------
 

@@ -4,6 +4,9 @@
     <a class="menu-item <% if(defineContent('page') === 'products'){ %> selected <% } %>" href="/products">Products</a>
     <a class="menu-item <% if(defineContent('page') === 'login'){ %> selected <% } %>" href="/login">Login</a>
     <% if($auth){%>
-        <div><%=$auth.dataValues.first_name%> <%=$auth.dataValues.last_name%></div>
+        <div style="font-family: sans-serif;font-size: 17px"><%=$auth.dataValues.first_name%> <%=$auth.dataValues.last_name%></div>
+    <%}%>
+    <% if($role){%>
+    <div style="font-family: sans-serif;font-size: 17px"><%=$role%></div>
     <%}%>
 </header>
