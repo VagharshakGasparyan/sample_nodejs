@@ -52,14 +52,14 @@ router.get('/login', async (req, res, next) => {
     // console.log(req.session);
 
     // generateToken(1);
-    if(res.locals.$auth){
+    if(res.locals.$auth.user){
         return res.redirect('/');
     }
 
     res.render('pages/login', {title: 'Login', page: 'login'});
 });
 router.post('/login', async (req, res, next) => {
-    if(res.locals.$auth){
+    if(res.locals.$auth.user){
         return res.redirect('/');
     }
 
@@ -83,7 +83,8 @@ router.post('/login', async (req, res, next) => {
         req.session.errors['email'] = 'The user with this email does not exists.';
         return res.redirectBack();
     }
-    loginUser(user.dataValues.id, req, res);
+    loginUser(user.dataValues.id, req, res, 'user');
+    loginUser(user.dataValues.id, req, res, 'admin');
 
     res.redirect('/');
 

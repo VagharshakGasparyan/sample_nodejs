@@ -82,7 +82,13 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({secret: 'Fb25ekS7Im', resave: true, saveUninitialized: true, cookie: {maxAge: 2 * 60 * 60 * 1000}}));
+app.use(session({
+    name: 'ses',
+    secret: 'Fb25ekS7Im',
+    resave: true,
+    saveUninitialized: true,
+    cookie: {maxAge: 2 * 60 * 60 * 1000}
+}));
 //--------------------------------------------------------------------
 global.usersTokens = {};
 //----------------------------middleware------------------------------
@@ -92,8 +98,26 @@ app.use(async function (req, res, next) {
     //   console.log('res.locals=', res.locals.products);
     // });
     //----------auth user-begin------------------------------
-    [res.locals.$auth, res.locals.$role] = await getUserByToken(req.session.token);
-    console.log('global.usersTokens=', global.usersTokens);
+    // console.log(req.cookies);
+    res.locals.$auth = {};
+    res.locals.$role = {};
+    // console.log('global.usersTokens=', global.usersTokens);
+    try {
+        let ses_tokens = req.session.tokens;
+        // console.log(ses_tokens);
+        if (ses_tokens) {
+            for (let role in ses_tokens) {
+                res.locals.$auth[role] = await getUserByToken(ses_tokens[role]);
+                res.locals.$role[role] = role;
+            }
+        }
+    } catch (e) {
+        log.error(moment().format('yyyy_MM_DD-HH:mm:ss') + '\n' + e.stack + '\n\n');
+    }
+
+    // res.locals.$auth = res.locals.$role = null;
+    // [res.locals.$auth, res.locals.$role] = await getUserByToken(req.session.tokens);
+    // console.log('global.usersTokens=', global.usersTokens);
     //----------auth user-end--------------------------------
 
     //----------old values-----------------------------------

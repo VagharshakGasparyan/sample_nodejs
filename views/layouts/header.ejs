@@ -3,10 +3,16 @@
     <a class="menu-item <% if(defineContent('page') === 'home'){ %> selected <% } %>" href="/">Home</a>
     <a class="menu-item <% if(defineContent('page') === 'products'){ %> selected <% } %>" href="/products">Products</a>
     <a class="menu-item <% if(defineContent('page') === 'login'){ %> selected <% } %>" href="/login">Login</a>
-    <% if($auth){%>
-        <div style="font-family: sans-serif;font-size: 17px"><%=$auth.dataValues.first_name%> <%=$auth.dataValues.last_name%></div>
+    <% if($auth.user){%>
+        <div style="font-family: sans-serif;font-size: 17px">User: <%=$auth.user.dataValues.first_name%> <%=$auth.user.dataValues.last_name%></div>
     <%}%>
-    <% if($role){%>
-    <div style="font-family: sans-serif;font-size: 17px"><%=$role%></div>
+    <% if($role.user){%>
+    <div style="font-family: sans-serif;font-size: 17px">Role: <%=$role.user%></div>
+    <%}%>
+    <% if($auth.admin){%>
+    <div style="font-family: sans-serif;font-size: 17px">Admin: <%=$auth.admin.dataValues.first_name%> <%=$auth.admin.dataValues.last_name%></div>
+    <%}%>
+    <% if($role.admin){%>
+    <div style="font-family: sans-serif;font-size: 17px">Role: <%=$role.admin%></div>
     <%}%>
 </header>
