@@ -11,7 +11,8 @@ require('dotenv').config();
 const {User} = require("./models");
 const {getUserByToken} = require('./components/functions');
 const {conf} = require('./config/app_config');
-
+const queryInterface = require('./models').sequelize.getQueryInterface();
+const { Op } = require("sequelize");
 //---------------------winston logger-begin---------------------------------------------
 const winston = require('winston');
 // Создайте логгер с несколькими транспортами (куда записывать логи)
@@ -30,7 +31,21 @@ const makeLog = () => {
 makeLog();
 cron.schedule('0 0 * * *', () => {//running every day at 0:00
     makeLog();
-    console.log('cron running at ' + moment().format('yyyy_MM_DD-HH:mm:ss'));
+    // console.log('cron running at ' + moment().format('yyyy_MM_DD-HH:mm:ss'));
+});
+// console.log(new Date(new Date() - conf.cookie.maxAge));
+cron.schedule('*/5 * * * *', async () => {//running every 5 minutes
+    // console.log('running session cleaner');
+    await queryInterface.bulkDelete(
+        conf.cookie.ses_table_name,
+        {
+            updated_at: {
+                [Op.lt]: new Date(new Date() - conf.cookie.maxAge)//updated_at < now - maxAge
+            }
+        },
+        {}
+    );
+    // console.log('cron running at ' + moment().format('yyyy_MM_DD-HH:mm:ss'));
 });
 // log.info('Это информационное сообщение.');
 // log.warn('Это предупреждение.');
@@ -104,11 +119,14 @@ app.use(async function (req, res, next) {
     // console.log('global.usersTokens=', global.usersTokens);
     try {
         for(let key in req.cookies){
-            if(key.startsWith(conf.cookie_token_prefix + conf.cookie_token_delimiter)){
-                let role = req.cookies[key].split(conf.cookie_token_delimiter)[1];
+            if(key.startsWith(conf.cookie.prefix + conf.cookie.delimiter)){
+                let role = req.cookies[key].split(conf.cookie.delimiter)[1];
                 let auth = await getUserByToken(req.cookies[key]);
                 if(auth && role){
                     res.locals.$auth[role] = auth;
+                    if(conf.cookie.re_save){
+                        res.cookie(key, req.cookies[key], {maxAge: conf.cookie.maxAge, httpOnly: true});
+                    }
                 }else{
                     res.cookie(key, '', {maxAge: -1});
                 }

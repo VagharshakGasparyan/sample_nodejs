@@ -1,4 +1,5 @@
 'use strict';
+const {conf} = require('../config/app_config');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -9,13 +10,13 @@ module.exports = {
          * Example:
          * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
          */
-        await queryInterface.createTable('sessions', {
-            id: {
-                allowNull: false,
-                autoIncrement: true,
-                primaryKey: true,
-                type: Sequelize.BIGINT
-            },
+        await queryInterface.createTable(conf.cookie.ses_table_name, {
+            // id: {
+            //     allowNull: false,
+            //     autoIncrement: true,
+            //     primaryKey: true,
+            //     type: Sequelize.BIGINT
+            // },
             user_id: {
                 allowNull: false,
                 type: Sequelize.BIGINT
@@ -47,6 +48,6 @@ module.exports = {
          * Example:
          * await queryInterface.dropTable('users');
          */
-        await queryInterface.dropTable('sessions');
+        await queryInterface.dropTable(conf.cookie.ses_table_name);
     }
 };
