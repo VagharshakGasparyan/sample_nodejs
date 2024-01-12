@@ -9,7 +9,7 @@ const {query, check, validationResult, checkSchema} = require('express-validator
 const moment = require('moment');
 const Joi = require('joi');
 const {validate} = require('../components/validate');
-const {generateToken, loginUser} = require('../components/functions');
+const {loginUser, logoutUser} = require('../components/functions');
 
 
 /* GET home page. */
@@ -83,11 +83,21 @@ router.post('/login', async (req, res, next) => {
         req.session.errors['email'] = 'The user with this email does not exists.';
         return res.redirectBack();
     }
-    loginUser(user.dataValues.id, req, res, 'user');
-    loginUser(user.dataValues.id, req, res, 'admin');
+    await loginUser(user.dataValues.id, req, res, 'user');
+    await loginUser(user.dataValues.id, req, res, 'admin');
 
     res.redirect('/');
 
+});
+
+router.get('/logout', async (req, res, next)=>{
+    if(res.locals.$auth.user){
+        await logoutUser(res.locals.$auth.user.dataValues.id, 'user', req, res);
+    }
+    if(res.locals.$auth.admin){
+        await logoutUser(res.locals.$auth.admin.dataValues.id, 'admin', req, res);
+    }
+    res.redirectBack();
 });
 
 

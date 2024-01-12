@@ -10,6 +10,7 @@ const cron = require('node-cron');
 require('dotenv').config();
 const {User} = require("./models");
 const {getUserByToken} = require('./components/functions');
+const {conf} = require('./config/app_config');
 
 //---------------------winston logger-begin---------------------------------------------
 const winston = require('winston');
@@ -87,7 +88,7 @@ app.use(session({
     secret: 'Fb25ekS7Im',
     resave: true,
     saveUninitialized: true,
-    cookie: {maxAge: 2 * 60 * 60 * 1000}
+    cookie: {maxAge: 10 * 60 * 1000}
 }));
 //--------------------------------------------------------------------
 global.usersTokens = {};
@@ -100,24 +101,22 @@ app.use(async function (req, res, next) {
     //----------auth user-begin------------------------------
     // console.log(req.cookies);
     res.locals.$auth = {};
-    res.locals.$role = {};
     // console.log('global.usersTokens=', global.usersTokens);
     try {
-        let ses_tokens = req.session.tokens;
-        // console.log(ses_tokens);
-        if (ses_tokens) {
-            for (let role in ses_tokens) {
-                res.locals.$auth[role] = await getUserByToken(ses_tokens[role]);
-                res.locals.$role[role] = role;
+        for(let key in req.cookies){
+            if(key.startsWith(conf.cookie_token_prefix + conf.cookie_token_delimiter)){
+                let role = req.cookies[key].split(conf.cookie_token_delimiter)[1];
+                let auth = await getUserByToken(req.cookies[key]);
+                if(auth && role){
+                    res.locals.$auth[role] = auth;
+                }else{
+                    res.cookie(key, '', {maxAge: -1});
+                }
             }
         }
     } catch (e) {
         log.error(moment().format('yyyy_MM_DD-HH:mm:ss') + '\n' + e.stack + '\n\n');
     }
-
-    // res.locals.$auth = res.locals.$role = null;
-    // [res.locals.$auth, res.locals.$role] = await getUserByToken(req.session.tokens);
-    // console.log('global.usersTokens=', global.usersTokens);
     //----------auth user-end--------------------------------
 
     //----------old values-----------------------------------

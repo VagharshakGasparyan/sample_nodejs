@@ -3,16 +3,11 @@
     <a class="menu-item <% if(defineContent('page') === 'home'){ %> selected <% } %>" href="/">Home</a>
     <a class="menu-item <% if(defineContent('page') === 'products'){ %> selected <% } %>" href="/products">Products</a>
     <a class="menu-item <% if(defineContent('page') === 'login'){ %> selected <% } %>" href="/login">Login</a>
+    <a class="menu-item <% if(defineContent('page') === 'logout'){ %> selected <% } %>" href="/logout">Logout</a>
     <% if($auth.user){%>
         <div style="font-family: sans-serif;font-size: 17px">User: <%=$auth.user.dataValues.first_name%> <%=$auth.user.dataValues.last_name%></div>
     <%}%>
-    <% if($role.user){%>
-    <div style="font-family: sans-serif;font-size: 17px">Role: <%=$role.user%></div>
-    <%}%>
     <% if($auth.admin){%>
     <div style="font-family: sans-serif;font-size: 17px">Admin: <%=$auth.admin.dataValues.first_name%> <%=$auth.admin.dataValues.last_name%></div>
-    <%}%>
-    <% if($role.admin){%>
-    <div style="font-family: sans-serif;font-size: 17px">Role: <%=$role.admin%></div>
     <%}%>
 </header>

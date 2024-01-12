@@ -26,6 +26,7 @@ npx sequelize-cli init
 - Migrations
 ```
 npx sequelize-cli model:generate --name User --attributes firstName:string,lastName:string,email:string
+npx sequelize-cli migration:generate --name session
 npx sequelize-cli db:migrate
 npx sequelize-cli db:migrate:undo
 npx sequelize-cli db:migrate:undo:all --to XXXXXXXXXXXXXX-create-user.js
