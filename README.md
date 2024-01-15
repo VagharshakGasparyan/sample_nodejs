@@ -18,6 +18,7 @@ npm i express-session
 npm i winston
 npm i moment
 npm i node-cron
+npm i jsonwebtoken
 npm i joi
 npm i sequelize
 npm i sequelize-cli
