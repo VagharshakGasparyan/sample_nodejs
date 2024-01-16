@@ -11,12 +11,6 @@ module.exports = {
          * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
          */
         await queryInterface.createTable(conf.cookie.ses_table_name, {
-            // id: {
-            //     allowNull: false,
-            //     autoIncrement: true,
-            //     primaryKey: true,
-            //     type: Sequelize.BIGINT
-            // },
             user_id: {
                 allowNull: false,
                 type: Sequelize.BIGINT

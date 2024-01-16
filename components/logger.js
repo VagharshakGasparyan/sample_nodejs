@@ -26,12 +26,16 @@ cron.schedule('0 0 * * *', () => {//running every day at 0:00
 // let processEvents = ['beforeExit', 'disconnect', 'exit', 'rejectionHandled', 'uncaughtException',
 //   'uncaughtExceptionMonitor', 'unhandledRejection', 'warning', 'message'];
 let errProcessEvents = ['uncaughtException', 'uncaughtExceptionMonitor'];
-errProcessEvents.forEach((errProcessEvent) => {
-    process.on(errProcessEvent, (err) => {
-        log.error(moment().format('yyyy_MM_DD-HH:mm:ss') + '\n' + err.stack + '\n\n');
-        process.exit(1);
-    });
+process.on('uncaughtException', (err) => {
+    log.error(moment().format('yyyy_MM_DD-HH:mm:ss') + '\n' + err.stack + '\n\n');
+    process.exit(1);
 });
+// errProcessEvents.forEach((errProcessEvent) => {
+//     process.on(errProcessEvent, (err) => {
+//         log.error(moment().format('yyyy_MM_DD-HH:mm:ss') + '\n' + err.stack + '\n\n');
+//         process.exit(1);
+//     });
+// });
 process.on('warning', (err) => {
     log.error(moment().format('yyyy_MM_DD-HH:mm:ss') + '\n' + err.stack + '\n\n');
 });

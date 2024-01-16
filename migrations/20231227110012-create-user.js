@@ -23,7 +23,14 @@ module.exports = {
         type: Sequelize.STRING
       },
       password: {
+        type: Sequelize.TEXT
+      },
+      role: {
         type: Sequelize.STRING
+      },
+      email_verified_at: {
+        allowNull: true,
+        type: Sequelize.DATE
       },
       created_at: {
         allowNull: true,

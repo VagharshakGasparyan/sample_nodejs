@@ -5,12 +5,13 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const cron = require('node-cron');
 require('dotenv').config();
+const formData = require("express-form-data");
+const os = require("os");
 require("./components/logger");
+
 //---------------------cron jobs-begin---------------------------------------------
 require("./jobs/session_clearener");
 //---------------------cron jobs-end---------------------------------------------
-const webRouter = require('./routes/web');
-const apiV1Router = require('./routes/api_v1');
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -19,7 +20,8 @@ app.use(require('express-ejs-layouts'));
 app.set('layout', 'layouts/main');
 
 app.use(express.json());
-app.use(express.urlencoded({extended: false}));
+app.use(express.urlencoded({extended: true}));
+app.use(formData.parse({uploadDir: os.tmpdir(), autoClean: true}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
@@ -32,6 +34,8 @@ app.use(session({
 
 app.use(require("./middleware/auth"));
 
+const webRouter = require('./routes/web');
+const apiV1Router = require('./routes/api_v1');
 app.use('/', webRouter);
 app.use('/api/v1', apiV1Router);
 
