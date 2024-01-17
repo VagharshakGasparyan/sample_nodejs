@@ -122,10 +122,10 @@ async function apiLogoutUser(userId, role, req, res) {
                 role: role
             }
         });
-        if(userSessions.length > 0){
-            if (bcrypt.compareSync(bearer_token, userSessions[0].token)) {
+        for (const ses of userSessions) {
+            if (bcrypt.compareSync(bearer_token, ses.token)) {
                 await queryInterface.bulkDelete(conf.cookie.ses_table_name, {
-                    token: userSessions[0].token,
+                    token: ses.token,
                     user_id: userId,
                     role: role
                 }, {});

@@ -7,7 +7,6 @@ async function auth(req, res, next) {
     for(let key in req.cookies){
         if(key.startsWith(conf.cookie.prefix + conf.cookie.delimiter)){
             let [role, userId, auth] = await getUserByToken(req.cookies[key], req, res, true);
-            // await refreshToken(userId, role, req.cookies[key], req, res);
             if(userId && role && auth){
                 res.locals.$auth[role] = auth;
             }else{
