@@ -5,12 +5,19 @@ const db = require('../models');
 const queryInterface = db.sequelize.getQueryInterface();
 
 function generateToken(userId, role, tokenLength = 128) {
-    let words = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$#@.-+*&^%{}[]:|=()';
-    let timeWords = '$#@.-+*&^%';
+    let words = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$#@.-+*&^%{}[]:|=()@!?<>';
     let token = userId + '\'' + role + '\'';
     let time = Date.now().toString();
+    let k = words.length / 10;
+    let arr_st = [];
+    for (let i = 0; i < 10; i++) {
+        arr_st.push(Math.round(i * k));
+    }
+    arr_st.push(words.length);
     for (let i = 0; i < time.length; i++) {
-        token += timeWords[parseInt(time[i])];
+        let  t = parseInt(time[i]);
+        let n = Math.floor(Math.random() * (arr_st[t + 1] - arr_st[t])) + arr_st[t];
+        token += words[n];
     }
     for (let i = 0; i < tokenLength - time.length; i++) {
         token += words[Math.floor(Math.random() * words.length)];
@@ -19,9 +26,14 @@ function generateToken(userId, role, tokenLength = 128) {
     return [token, hashedToken];
 }
 
+async function saveAndGetUserToken(userId, role = 'user') {
+    let tokens = generateToken(userId, role);
+    await saveToken(userId, role, tokens[1]);
+    return tokens[0];
+}
+
 async function loginUser(userId, req, res, role = 'user') {
     let tokens = generateToken(userId, role);
-    // req.session.tokens = {...(req.session.tokens ?? {}), [role]: tokens[0]};
     res.cookie(conf.cookie.prefix + conf.cookie.delimiter + role, tokens[0], {
         maxAge: conf.cookie.maxAge,
         httpOnly: true
@@ -30,21 +42,26 @@ async function loginUser(userId, req, res, role = 'user') {
 }
 
 async function getUserByToken(token) {
-    let userId = token ? token.split(conf.cookie.delimiter)[0] : null;
-    let userSessions = await queryInterface.select(null, conf.cookie.ses_table_name, {where: {user_id: userId}});
+    let [userId, role] = token ? token.split(conf.cookie.delimiter) : [null, null];
+    let userSessions = userId && role
+        ? await queryInterface.select(null, conf.cookie.ses_table_name, {where: {user_id: userId, role: role}})
+        : [];
     for (const ses of userSessions) {
         if (bcrypt.compareSync(token, ses.token)) {
             if (conf.cookie.re_save) {
                 await queryInterface.bulkUpdate(conf.cookie.ses_table_name, {updated_at: new Date()}, {
                     token: ses.token,
                     user_id: userId,
-                    role: ses.role
+                    role: role
                 });
             }
-            return await User.findOne({where: {id: userId}});
+            let auth = await User.findOne({where: {id: userId}});
+            if(auth){
+                return [role, userId, auth];
+            }
         }
     }
-    return null;
+    return [null, null, null];
 }
 
 async function saveToken(userId, role, token) {
@@ -57,11 +74,6 @@ async function saveToken(userId, role, token) {
             updated_at: new Date()
         }
     ], {});
-    // if(userId in global.usersTokens && Array.isArray(global.usersTokens[userId])){
-    //     global.usersTokens[userId].push(token);
-    // }else{
-    //     global.usersTokens[userId] = [token];
-    // }
 }
 
 async function logoutUser(userId, role, req, res) {
@@ -83,10 +95,7 @@ async function logoutUser(userId, role, req, res) {
                 res.cookie(cookie_key, '', {maxAge: -1});
             }
         }
-        // console.log(userSessions);
     }
-    // await queryInterface.bulkDelete('sessions', null, {where: {user_id: userId, role: role}});
-    // res.cookie('_t_ses\'' + role, '', {maxAge: -1});
 }
 
-module.exports = {generateToken, loginUser, getUserByToken, logoutUser};
+module.exports = {loginUser, getUserByToken, logoutUser, saveAndGetUserToken};

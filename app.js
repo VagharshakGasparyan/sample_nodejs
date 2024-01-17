@@ -33,6 +33,7 @@ app.use(session({
 }));
 
 app.use(require("./middleware/auth"));
+app.use(require("./middleware/api_auth"));
 
 const webRouter = require('./routes/web');
 const apiV1Router = require('./routes/api_v1');
