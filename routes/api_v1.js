@@ -3,7 +3,7 @@ const {validate, api_validate} = require("../components/validate");
 const Joi = require("joi");
 const {User} = require("../models");
 const bcrypt = require("bcrypt");
-const {loginUser, saveAndGetUserToken} = require("../components/functions");
+const {saveAndGetUserToken, apiLogoutUser} = require("../components/functions");
 const router = express.Router();
 
 /* GET users listing. */
@@ -37,9 +37,23 @@ router.post('/login', async function(req, res, next) {
   return res.send({user: user, token: token});
 });
 
+router.get('/logout', async (req, res, next)=>{
+  let logout = false;
+  if(res.locals.$api_auth.admin){
+    logout = await apiLogoutUser(res.locals.$api_auth.admin.dataValues.id, 'admin', req, res);
+  }
+  if(res.locals.$api_auth.user){
+    logout = await apiLogoutUser(res.locals.$api_auth.user.dataValues.id, 'user', req, res);
+  }
+  if(logout){
+    return res.send({message: 'Logged out successfully.'});
+  }
+  return res.send({errors: 'Not logged out.'});
+});
+
 router.get('/products', async (req, res) => {
 
-  return res.send(res.locals.$auth);
+  return res.send(res.locals.$api_auth);
 });
 
 

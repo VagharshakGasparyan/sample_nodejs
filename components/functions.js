@@ -97,5 +97,29 @@ async function logoutUser(userId, role, req, res) {
         }
     }
 }
+async function apiLogoutUser(userId, role, req, res) {
+    let bw = 'Bearer ';
+    let bearer_token = req.headers.authorization;
+    bearer_token = bearer_token && bearer_token.startsWith(bw) ? bearer_token.slice(bw.length) : null;
+    if(bearer_token){
+        let userSessions = await queryInterface.select(null, conf.cookie.ses_table_name, {
+            where: {
+                user_id: userId,
+                role: role
+            }
+        });
+        if(userSessions.length > 0){
+            if (bcrypt.compareSync(bearer_token, userSessions[0].token)) {
+                await queryInterface.bulkDelete(conf.cookie.ses_table_name, {
+                    token: userSessions[0].token,
+                    user_id: userId,
+                    role: role
+                }, {});
+                return true;
+            }
+        }
+    }
+    return false;
 
-module.exports = {loginUser, getUserByToken, logoutUser, saveAndGetUserToken};
+}
+module.exports = {loginUser, getUserByToken, logoutUser, apiLogoutUser, saveAndGetUserToken};
