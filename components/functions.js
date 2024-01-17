@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const {User} = require("../models");
 const {conf} = require('../config/app_config');
 const db = require('../models');
+const {Op} = require("sequelize");
 const queryInterface = db.sequelize.getQueryInterface();
 
 function generateToken(userId, role, tokenLength = 128) {
@@ -41,18 +42,30 @@ async function loginUser(userId, req, res, role = 'user') {
     await saveToken(userId, role, tokens[1]);
 }
 
-async function getUserByToken(token) {
+async function getUserByToken(token, req, res, can_refresh_token = false) {
     let [userId, role] = token ? token.split(conf.cookie.delimiter) : [null, null];
     let userSessions = userId && role
         ? await queryInterface.select(null, conf.cookie.ses_table_name, {where: {user_id: userId, role: role}})
         : [];
     for (const ses of userSessions) {
         if (bcrypt.compareSync(token, ses.token)) {
-            if (conf.cookie.re_save) {
-                await queryInterface.bulkUpdate(conf.cookie.ses_table_name, {updated_at: new Date()}, {
+            let values = {updated_at: new Date()};
+            let toRefresh = Boolean(can_refresh_token && (ses.refresh ?? new Date()) < new Date(new Date() - conf.cookie.refresh_timeout));
+            if(toRefresh){
+                let newTokens = generateToken(userId, role);
+                values.token = newTokens[1];
+                values.refresh = new Date();
+                token = newTokens[0];
+            }
+            if (conf.cookie.re_save || toRefresh) {
+                await queryInterface.bulkUpdate(conf.cookie.ses_table_name, values, {
                     token: ses.token,
                     user_id: userId,
                     role: role
+                });
+                res.cookie(conf.cookie.prefix + conf.cookie.delimiter + role, token, {
+                    maxAge: conf.cookie.maxAge,
+                    httpOnly: true
                 });
             }
             let auth = await User.findOne({where: {id: userId}});
@@ -70,6 +83,7 @@ async function saveToken(userId, role, token) {
             user_id: userId,
             role: role,
             token: token,
+            refresh: new Date(),
             created_at: new Date(),
             updated_at: new Date()
         }

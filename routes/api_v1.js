@@ -48,6 +48,7 @@ router.get('/logout', async (req, res, next)=>{
   if(logout){
     return res.send({message: 'Logged out successfully.'});
   }
+  res.status(422);
   return res.send({errors: 'Not logged out.'});
 });
 

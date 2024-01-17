@@ -6,8 +6,8 @@ const session = require('express-session');
 const cron = require('node-cron');
 require('dotenv').config();
 const formData = require("express-form-data");
-const os = require("os");
-require("./components/logger");
+const os = require("node:os");
+// require("./components/logger");
 
 //---------------------cron jobs-begin---------------------------------------------
 require("./jobs/session_clearener");
@@ -35,10 +35,8 @@ app.use(session({
 app.use(require("./middleware/auth"));
 app.use(require("./middleware/api_auth"));
 
-const webRouter = require('./routes/web');
-const apiV1Router = require('./routes/api_v1');
-app.use('/', webRouter);
-app.use('/api/v1', apiV1Router);
+app.use('/', require('./routes/web'));
+app.use('/api/v1', require('./routes/api_v1'));
 
 require("./middleware/errors")(app);
 

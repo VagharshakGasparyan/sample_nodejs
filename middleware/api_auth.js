@@ -7,7 +7,7 @@ async function api_auth(req, res, next) {
     res.locals.$api_auth = {};
     let bearer_token = req.headers.authorization;
     bearer_token = bearer_token && bearer_token.startsWith(bw) ? bearer_token.slice(bw.length) : null;
-    let [role, userId, auth] = await getUserByToken(bearer_token);
+    let [role, userId, auth] = await getUserByToken(bearer_token, req, res);
     if(userId && role && auth){
         res.locals.$api_auth[role] = auth;
     }

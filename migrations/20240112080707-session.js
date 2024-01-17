@@ -24,6 +24,10 @@ module.exports = {
                 allowNull: false,
                 // allowNull defaults to true
             },
+            refresh: {
+                allowNull: true,
+                type: Sequelize.DATE
+            },
             created_at: {
                 allowNull: true,
                 type: Sequelize.DATE
