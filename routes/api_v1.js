@@ -11,6 +11,8 @@ router.get('/', function(req, res, next) {
   res.send('respond with a resource');
 });
 router.post('/login', async function(req, res, next) {
+  log.info('api login.');
+fhyjghyj
   console.log('req.body=', req.body);
   let valid_err = api_validate({
     email: Joi.string().email().required(),
