@@ -5,6 +5,7 @@ const {User} = require("../models");
 const bcrypt = require("bcrypt");
 const {saveAndGetUserToken, apiLogoutUser} = require("../components/functions");
 const router = express.Router();
+const fs = require("node:fs");
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -57,7 +58,8 @@ router.get('/products', async (req, res) => {
   return res.send(res.locals.$api_auth);
 });
 router.post('/upload-file', async (req, res) => {
-  console.log(req.files, req.body);
+  console.log(req.files.avatar);
+  // fs.writeFileSync(__basedir + '/academious_123.png', req.files.avatar );
   return res.send({is: 'ok'});
 });
 

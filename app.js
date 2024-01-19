@@ -28,7 +28,7 @@ app.set('layout', 'layouts/main');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-app.use(formData.parse({uploadDir: os.tmpdir(), autoClean: true}));
+app.use(formData.parse({uploadDir: /*os.tmpdir()*/ __dirname + '/tmp', autoClean: true}));
 app.use(formData.format());
 // app.use(formData.stream());
 app.use(formData.union());
