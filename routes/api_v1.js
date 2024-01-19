@@ -56,6 +56,9 @@ router.get('/products', async (req, res) => {
 
   return res.send(res.locals.$api_auth);
 });
-
+router.post('/upload-file', async (req, res) => {
+  console.log(req.files, req.body);
+  return res.send({is: 'ok'});
+});
 
 module.exports = router;
