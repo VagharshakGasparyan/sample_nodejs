@@ -1,3 +1,4 @@
+global.__basedir = __dirname;
 const express = require('express');
 const app = express();
 const path = require('node:path');
@@ -11,12 +12,12 @@ const os = require("node:os");
 const moment = require("moment/moment");
 const winston = require('winston');
 // require("./components/logger");
-//--------------------------------------------------logger-begin-----------------------
-
-//--------------------------------------------------logger-end-------------------------
+const fs = require("node:fs");
+//-------------------------------temp------------------------------------
 
 //---------------------cron jobs-begin---------------------------------------------
-require("./jobs/session_clearener");
+require("./jobs/sessionCleaner");
+require("./jobs/logFileCleaner");
 //---------------------cron jobs-end---------------------------------------------
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

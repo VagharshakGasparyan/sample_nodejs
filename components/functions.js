@@ -183,4 +183,5 @@ async function apiLogoutUser(userId, role, req, res) {
     return false;
 
 }
+
 module.exports = {loginUser, logoutUser, apiLogoutUser, saveAndGetUserToken, getApiAuth, getWebAuth};
