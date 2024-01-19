@@ -10,7 +10,7 @@ module.exports = {
          * Example:
          * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
          */
-        await queryInterface.createTable(conf.cookie.ses_table_name, {
+        await queryInterface.createTable(conf.token.table, {
             user_id: {
                 allowNull: false,
                 type: Sequelize.BIGINT
@@ -28,10 +28,6 @@ module.exports = {
                 allowNull: true,
                 type: Sequelize.DATE
             },
-            created_at: {
-                allowNull: true,
-                type: Sequelize.DATE
-            },
             updated_at: {
                 allowNull: true,
                 type: Sequelize.DATE
@@ -46,6 +42,6 @@ module.exports = {
          * Example:
          * await queryInterface.dropTable('users');
          */
-        await queryInterface.dropTable(conf.cookie.ses_table_name);
+        await queryInterface.dropTable(conf.token.table);
     }
 };

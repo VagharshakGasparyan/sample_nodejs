@@ -1,19 +1,9 @@
 const {conf} = require("../config/app_config");
-const {getUserByToken} = require("../components/functions");
+const {getWebAuth} = require("../components/functions");
 const moment = require("moment/moment");
 
 async function auth(req, res, next) {
-    res.locals.$auth = {};
-    for(let key in req.cookies){
-        if(key.startsWith(conf.cookie.prefix + conf.cookie.delimiter)){
-            let [role, userId, auth] = await getUserByToken(req.cookies[key], req, res, true);
-            if(userId && role && auth){
-                res.locals.$auth[role] = auth;
-            }else{
-                res.cookie(key, '', {maxAge: -1});
-            }
-        }
-    }
+    res.locals.$auth = await getWebAuth(req, res);
     //----------old values-----------------------------------
     res.locals.$old = req.session.old || {};
     req.session.old = req.body || {};

@@ -6,10 +6,10 @@ const queryInterface = require('../models').sequelize.getQueryInterface();
 cron.schedule('*/5 * * * *', async () => {//running every 5 minutes
     // console.log('running session cleaner');
     await queryInterface.bulkDelete(
-        conf.cookie.ses_table_name,
+        conf.token.table,
         {
             updated_at: {
-                [Op.lt]: new Date(new Date() - conf.cookie.maxAge)//updated_at < now - maxAge
+                [Op.lt]: new Date(new Date() - conf.token.maxAge)//updated_at < now - maxAge
             }
         },
         {}

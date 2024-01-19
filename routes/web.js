@@ -51,7 +51,6 @@ router.get('/login', async (req, res, next) => {
     // console.log(moment().format('yyyy_MM_DD_HH:mm:ss'));
     // console.log(req.session);
 
-    // generateToken(1);
     if(res.locals.$auth.user){
         return res.redirect('/');
     }
