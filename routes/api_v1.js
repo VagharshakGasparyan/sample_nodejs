@@ -58,8 +58,13 @@ router.get('/products', async (req, res) => {
   return res.send(res.locals.$api_auth);
 });
 router.post('/upload-file', async (req, res) => {
-  console.log(req.files.avatar);
+  let file = req.files.avatar;
+  if(file){
+    console.log(file);
+    fs.copyFileSync(file.path, __basedir + '/public/images/qwerty.png');
+  }
   // fs.writeFileSync(__basedir + '/academious_123.png', req.files.avatar );
+
   return res.send({is: 'ok'});
 });
 
