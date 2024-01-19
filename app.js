@@ -13,6 +13,7 @@ const moment = require("moment/moment");
 const winston = require('winston');
 // require("./components/logger");
 const fs = require("node:fs");
+const fileUpload = require("express-fileupload");
 //-------------------------------temp------------------------------------
 
 //---------------------cron jobs-begin---------------------------------------------
@@ -28,9 +29,24 @@ app.set('layout', 'layouts/main');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-app.use(formData.parse({uploadDir: /*os.tmpdir()*/ __dirname + '/tmp', autoClean: true}));
-app.use(formData.format());
+/*
+self.autoFields = !!opts.autoFields
+  self.autoFiles = !!opts.autoFiles
+
+  self.maxFields = opts.maxFields || 1000
+  self.maxFieldsSize = opts.maxFieldsSize || 2 * 1024 * 1024
+  self.maxFilesSize = opts.maxFilesSize || Infinity
+  self.uploadDir = opts.uploadDir || os.tmpdir()
+  self.encoding = opts.encoding || 'utf8'
+*/
+// app.use(formData.parse({uploadDir: /*os.tmpdir()*/ __dirname + '/tmp', autoClean: true}));
+// app.use(formData.format());
 // app.use(formData.stream());
+app.use(fileUpload({
+    limits: { fileSize: 50 * 1024 * 1024 },
+    useTempFiles : true,
+    tempFileDir : __dirname + '/tmp'
+}));
 app.use(formData.union());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));

@@ -59,9 +59,11 @@ router.get('/products', async (req, res) => {
 });
 router.post('/upload-file', async (req, res) => {
   let file = req.files.avatar;
+  console.log('req.body=', req.body);
   if(file){
     console.log(file);
-    fs.copyFileSync(file.path, __basedir + '/public/images/qwerty.png');
+    // fs.copyFileSync(file.path, __basedir + '/public/images/qwerty.png');
+    fs.writeFileSync(__basedir + '/public/images/myFile.png', file.data );
   }
   // fs.writeFileSync(__basedir + '/academious_123.png', req.files.avatar );
 

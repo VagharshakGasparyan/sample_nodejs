@@ -15,6 +15,11 @@ const conf = {
         refresh: true,
         refreshTime: 5 * 60 * 1000,
     },
+    log: {
+        format: 'yyyy_MM_DD',
+        ext: '.log',
+        path: 'logs',
+    },
     lang: {
         default: 'hy',
         all: {'hy': 'Հայերեն', 'en': 'English', 'ru': 'Русский'},
