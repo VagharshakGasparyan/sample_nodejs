@@ -42,12 +42,15 @@ self.autoFields = !!opts.autoFields
 // app.use(formData.parse({uploadDir: /*os.tmpdir()*/ __dirname + '/tmp', autoClean: true}));
 // app.use(formData.format());
 // app.use(formData.stream());
+// app.use(formData.union());
 app.use(fileUpload({
     limits: { fileSize: 50 * 1024 * 1024 },
-    useTempFiles : true,
-    tempFileDir : __dirname + '/tmp'
+    // useTempFiles : true,
+    // tempFileDir : __dirname + '/tmp',
+    // safeFileNames: true,
+    // preserveExtension: true,
 }));
-app.use(formData.union());
+
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({

@@ -6,13 +6,13 @@ const bcrypt = require("bcrypt");
 const {saveAndGetUserToken, apiLogoutUser} = require("../components/functions");
 const router = express.Router();
 const fs = require("node:fs");
+const md5 = require('md5');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   res.send('respond with a resource');
 });
 router.post('/login', async function(req, res, next) {
-
   let valid_err = api_validate({
     email: Joi.string().email().required(),
     password: Joi.string().min(6).max(20).required()
@@ -58,12 +58,19 @@ router.get('/products', async (req, res) => {
   return res.send(res.locals.$api_auth);
 });
 router.post('/upload-file', async (req, res) => {
-  let file = req.files.avatar;
-  console.log('req.body=', req.body);
+  let file = req.files ? req.files.avatar : null;
+  // console.log('req.body=', req.body);
+  // console.log('req.files=', req.files);
+  // return res.send({is: 'ok'});
+
   if(file){
     console.log(file);
+    // console.log(file.data);
+    console.log(Date.now());
+    let imageName = md5(Date.now());
+    let ext = file.mimetype === 'image/jpeg' ? '.jpg' : '.png';
     // fs.copyFileSync(file.path, __basedir + '/public/images/qwerty.png');
-    fs.writeFileSync(__basedir + '/public/images/myFile.png', file.data );
+    fs.writeFileSync(__basedir + '/public/images/' + imageName + ext, file.data );
   }
   // fs.writeFileSync(__basedir + '/academious_123.png', req.files.avatar );
 
