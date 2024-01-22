@@ -4,7 +4,7 @@ const {makeDirectoryIfNotExists} = require("./functions");
 
 module.exports = (dirname) => {
     global.__basedir = dirname;
-    global.uploadFile = (path, fileName, fileData) => {
+    global.saveFileContent = (path, fileName, fileData) => {
         try {
             let fullPath = __basedir + '/public/' + path;
             makeDirectoryIfNotExists(fullPath);

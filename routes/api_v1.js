@@ -69,7 +69,7 @@ router.post('/upload-file', async (req, res) => {
     let imageName = md5(Date.now());
     let ext = extFrom(file.mimetype, file.name);
     // fs.copyFileSync(file.path, __basedir + '/public/images/qwerty.png');
-    let uploaded = uploadFile('storage/uploads/avatars', imageName + ext, file.data);
+    let uploaded = saveFileContent('storage/uploads/avatars', imageName + ext, file.data);
     if(!uploaded){
       res.status(422);
       return res.send({errors: 'file not uploaded.'});
