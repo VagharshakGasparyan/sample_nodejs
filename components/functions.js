@@ -4,6 +4,7 @@ const {conf} = require('../config/app_config');
 const db = require('../models');
 const {Op} = require("sequelize");
 const {boolean} = require("joi");
+const fs = require("node:fs");
 const queryInterface = db.sequelize.getQueryInterface();
 
 async function getTokenData(userId, role, token){
@@ -184,4 +185,19 @@ async function apiLogoutUser(userId, role, req, res) {
 
 }
 
-module.exports = {loginUser, logoutUser, apiLogoutUser, saveAndGetUserToken, getApiAuth, getWebAuth};
+function makeDirectoryIfNotExists(path) {
+    let pathArr = path.split(/[/\\]/ig);
+    try {
+        let addPath = '';
+        pathArr.forEach((pathItem)=>{
+            addPath += pathItem + '/';
+            if(!fs.existsSync(addPath) || !fs.statSync(addPath).isDirectory()){
+                fs.mkdirSync(addPath);
+            }
+        });
+    }catch (e) {
+        console.error(e);
+    }
+}
+
+module.exports = {loginUser, logoutUser, apiLogoutUser, saveAndGetUserToken, getApiAuth, getWebAuth, makeDirectoryIfNotExists};

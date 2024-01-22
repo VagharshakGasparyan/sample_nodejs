@@ -7,6 +7,7 @@ const {saveAndGetUserToken, apiLogoutUser} = require("../components/functions");
 const router = express.Router();
 const fs = require("node:fs");
 const md5 = require('md5');
+const {extFrom} = require('../components/mimeToExt');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -64,13 +65,17 @@ router.post('/upload-file', async (req, res) => {
   // return res.send({is: 'ok'});
 
   if(file){
-    console.log(file);
-    // console.log(file.data);
-    console.log(Date.now());
+    // console.log(file);
     let imageName = md5(Date.now());
-    let ext = file.mimetype === 'image/jpeg' ? '.jpg' : '.png';
+    let ext = extFrom(file.mimetype, file.name);
     // fs.copyFileSync(file.path, __basedir + '/public/images/qwerty.png');
-    fs.writeFileSync(__basedir + '/public/images/' + imageName + ext, file.data );
+    let uploaded = uploadFile('storage/uploads/avatars', imageName + ext, file.data);
+    if(!uploaded){
+      res.status(422);
+      return res.send({errors: 'file not uploaded.'});
+    }
+    console.log(uploaded);
+    // fs.writeFileSync(__basedir + '/public/images/' + imageName + ext, file.data );
   }
   // fs.writeFileSync(__basedir + '/academious_123.png', req.files.avatar );
 
