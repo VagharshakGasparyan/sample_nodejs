@@ -10,24 +10,32 @@ module.exports = (sequelize, DataTypes) => {
         static associate(models) {
             // define association here
         }
-        getName() {
-            return this.name['en'] ?? this.name['hy'] ?? '';
-        }
+        // getName() {
+        //     return this.name['en'] ?? this.name['hy'] ?? '';
+        // }
     }
 
     Product.init({
         // id: DataTypes.STRING,
         slug: DataTypes.STRING,
-        name: DataTypes.STRING,
+        name: {
+            type: DataTypes.STRING,
+            // get(){
+            //     return JSON.parse(this.name);// /*this.name['en'] ?? this.name['hy'] ?? ''*/ 'ewrgterthyd';
+            // }
+        },
         description: DataTypes.STRING,
-        stock: DataTypes.STRING,
-        brand_id: DataTypes.STRING,
         image: DataTypes.STRING,
+        images: DataTypes.STRING,
+        category_id: DataTypes.STRING,
+        disable: DataTypes.STRING,
     }, {
         sequelize,
         modelName: 'Product',
         tableName: 'products',
-        timestamps: false,
+        // timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: 'updated_at',
     });
     return Product;
 };

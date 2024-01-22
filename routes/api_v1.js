@@ -56,7 +56,7 @@ router.get('/logout', async (req, res, next)=>{
 
 router.get('/products', async (req, res) => {
 
-  return res.send(res.locals.$api_auth);
+  return res.send({auth: res.locals.$api_auth, locale: res.locals.$api_local});
 });
 router.post('/upload-file', async (req, res) => {
   let file = req.files ? req.files.avatar : null;

@@ -21,22 +21,12 @@ router.get('/', (req, res, next) => {
     res.render('pages/home', {title: 'Home', page: 'home'});
 });
 router.get('/products', async (req, res, next) => {
-    //qwerty
-    // res.location('/login');
-    // res.get('location');
-    // res.redirect('/about');
-    //res.redirect(status: number, url: string): void;
-    //res.redirect(status: number, url: string): void;
-    // console.log(User.);
-    // const user = new User({ id: 1 });
-    // console.log(user.id);
-    // console.log(bcrypt.compareSync('qwerty', '$2b$08$anjueAN9I.ROPfygoSbF2uyqSvpFhwW/ZpIXXgqvG0fd4kTnGAMPa'));
 
     let products = [];
     try {
         products = await Product.findAll({
             limit: 20,
-            where: {brand_id: {[Op.not]: null}},
+            where: {disable: false},
             order: [['id', 'ASC']]
         });
         // const jane = await User.create({ first_name: "Jane", last_name: "Doe", email: "johnDoe@gmail.com" });

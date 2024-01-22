@@ -9,12 +9,11 @@
     <% (locals.products ?? []).forEach((product)=>{ %>
         <div class="pr-id">id=<%= product.id %></div>
         <div>slug=<%= product.slug %></div>
-        <div>name=<%= product.getName() %></div>
-        <div>stock=<%= product.stock %></div>
-        <div>brand id=<%= product.brand_id %></div>
+        <div>name=<%= product.name %></div>
+        <div>Description=<%= product.description %></div>
+        <div>category id=<%= product.category_id %></div>
         <div>image=<%= product.image %></div>
         <img src="<%= '/' + product.image %>" alt="no image" style="max-width: 256px">
-<!--        <div><%- '<span style="color: chocolate">ABC</span>' %></div>-->
         <hr>
     <% }) %>
 </section>
