@@ -20,11 +20,18 @@ module.exports = (sequelize, DataTypes) => {
         slug: DataTypes.STRING,
         name: {
             type: DataTypes.STRING,
-            // get(){
-            //     return JSON.parse(this.name);// /*this.name['en'] ?? this.name['hy'] ?? ''*/ 'ewrgterthyd';
-            // }
+            get(){
+                const rawName = this.getDataValue('name');
+                return rawName['en'] ?? rawName['hy'] ?? '';
+            }
         },
-        description: DataTypes.STRING,
+        description: {
+            type: DataTypes.STRING,
+            get(){
+                const rawDescription = this.getDataValue('description');
+                return rawDescription['en'] ?? rawDescription['hy'] ?? '';
+            }
+        },
         image: DataTypes.STRING,
         images: DataTypes.STRING,
         category_id: DataTypes.STRING,
