@@ -23,7 +23,6 @@ async function auth(req, res, next) {
         url: req.url,
     };
     //----------local-----------------------------------------
-
     let ld = conf.lang.default ?? null;
     let l = res.locals.$local = conf.lang.default ?? null;
     res.locals.$tr = (w) => {
@@ -35,8 +34,12 @@ async function auth(req, res, next) {
                     return translations[w][ld];
                 }
             }
-            if(w && typeof w === 'object' && l && typeof l === 'string' && l in w){
-                return w[l];
+            if(w && typeof w === 'object' && l && typeof l === 'string'){
+                if(l in w){
+                    return w[l];
+                }else if(ld && typeof ld === 'string' && ld in w){
+                    return w[ld];
+                }
             }
             return w;
         }catch (e) {
