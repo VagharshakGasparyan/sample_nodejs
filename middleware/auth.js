@@ -23,6 +23,7 @@ async function auth(req, res, next) {
         url: req.url,
     };
     //----------local-----------------------------------------
+
     let ld = conf.lang.default ?? null;
     let l = res.locals.$local = conf.lang.default ?? null;
     res.locals.$tr = (w) => {
