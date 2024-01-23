@@ -8,9 +8,9 @@
 
     <% (locals.products ?? []).forEach((product)=>{ %>
         <div class="pr-id">id=<%= product.id %></div>
-        <div>slug=<%= product.slug %></div>
-        <div>name=<%= product.name %></div>
-        <div>Description=<%= product.description %></div>
+        <div>slug=<%=product.slug %></div>
+        <div>name=<%=$tr(product.name)%></div>
+        <div>Description=<%=$tr(product.description) %></div>
         <div>category id=<%= product.category_id %></div>
         <div>image=<%= product.image %></div>
         <img src="<%= '/' + product.image %>" alt="no image" style="max-width: 256px">

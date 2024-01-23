@@ -21,7 +21,7 @@ router.get('/', (req, res, next) => {
     res.render('pages/home', {title: 'Home', page: 'home'});
 });
 router.get('/products', async (req, res, next) => {
-
+    console.log(res.locals.$local);
     let products = [];
     try {
         products = await Product.findAll({
@@ -34,7 +34,7 @@ router.get('/products', async (req, res, next) => {
         console.error('error=', e);
     }
     // let products = DB('SELECT * FROM `products` LIMIT 3');
-    // console.log(products);
+    console.log(products[0].getName());
     res.render('pages/products', {title: 'Products', page: 'products', products: products});
 });
 router.get('/login', async (req, res, next) => {

@@ -11,8 +11,8 @@ const conf = {
     },
     web: {
         prefix: '_t_ses',
-        renewal: true,
-        refresh: true,
+        renewal: true,//if true: last request time add maxAge to token expire.
+        refresh: true,//if true: refresh token every refreshTime.
         refreshTime: 5 * 60 * 1000,
     },
     log: {

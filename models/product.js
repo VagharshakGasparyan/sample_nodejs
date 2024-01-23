@@ -10,9 +10,9 @@ module.exports = (sequelize, DataTypes) => {
         static associate(models) {
             // define association here
         }
-        // getName() {
-        //     return this.name['en'] ?? this.name['hy'] ?? '';
-        // }
+        getName() {
+            return 'my name is Name';
+        }
     }
 
     Product.init({
@@ -20,17 +20,17 @@ module.exports = (sequelize, DataTypes) => {
         slug: DataTypes.STRING,
         name: {
             type: DataTypes.STRING,
-            get(){
-                const rawName = this.getDataValue('name');
-                return rawName['en'] ?? rawName['hy'] ?? '';
-            }
+            // get(){
+            //     const rawName = this.getDataValue('name');
+            //     return rawName['en'] ?? rawName['hy'] ?? '';
+            // }
         },
         description: {
             type: DataTypes.STRING,
-            get(){
-                const rawDescription = this.getDataValue('description');
-                return rawDescription['en'] ?? rawDescription['hy'] ?? '';
-            }
+            // get(){
+            //     const rawDescription = this.getDataValue('description');
+            //     return rawDescription['en'] ?? rawDescription['hy'] ?? '';
+            // }
         },
         image: DataTypes.STRING,
         images: DataTypes.STRING,
@@ -38,6 +38,10 @@ module.exports = (sequelize, DataTypes) => {
         disable: DataTypes.STRING,
     }, {
         sequelize,
+        //----------------------------------------------------------------
+
+        //----------------------------------------------------------------
+
         modelName: 'Product',
         tableName: 'products',
         // timestamps: true,
