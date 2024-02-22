@@ -45,21 +45,21 @@ const conf = {
             user: process.env.DEV_DB_USER ?? "root",
             port: process.env.DEV_DB_PORT ?? 3306,
             password: process.env.DEV_DB_PASS ?? "",
-            database: process.env.DEV_DB ?? "webtop_db"
+            database: process.env.DEV_DB ?? "sample_node_db"
         },
         test: {
             host: process.env.TEST_HOST ?? "localhost",
             user: process.env.TEST_DB_USER ?? "root",
             port: process.env.TEST_DB_PORT ?? 3306,
             password: process.env.TEST_DB_PASS ?? "",
-            database: process.env.TEST_DB ?? "webtop_db_test"
+            database: process.env.TEST_DB ?? "sample_node_db_test"
         },
         production: {
             host: process.env.PROD_HOST ?? "localhost",
             user: process.env.PROD_DB_USER ?? "root",
             port: process.env.PROD_DB_PORT ?? 3306,
             password: process.env.PROD_DB_PASS ?? "",
-            database: process.env.PROD_DB ?? "webtop_db"
+            database: process.env.PROD_DB ?? "sample_node_db"
         }
     },
 

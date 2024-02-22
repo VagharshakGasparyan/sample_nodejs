@@ -78,6 +78,21 @@ function fDB(q) {
     });
 }
 
+function getConstraint(table, relatedTable) {
+    let mode = process.env.NODE_ENV ?? "production";
+    let config = conf.database[mode];
+    let dbName = config.database;
+    let q = "SELECT RefCons.CONSTRAINT_SCHEMA, RefCons.TABLE_NAME, RefCons.REFERENCED_TABLE_NAME, RefCons.CONSTRAINT_NAME, KeyCol.COLUMN_NAME, KeyCol.REFERENCED_COLUMN_NAME\n"
+        + "FROM information_schema.referential_constraints RefCons\n"
+        + "JOIN information_schema.key_column_usage KeyCol ON RefCons.CONSTRAINT_SCHEMA = KeyCol.table_schema\n"
+        + "AND RefCons.TABLE_NAME = KeyCol.TABLE_NAME\n"
+        + "AND RefCons.CONSTRAINT_NAME = KeyCol.CONSTRAINT_NAME\n"
+        + "WHERE RefCons.CONSTRAINT_SCHEMA = " + _val(dbName)
+        +" AND RefCons.TABLE_NAME = " + _val(table)
+        +" AND RefCons.REFERENCED_TABLE_NAME = " + _val(relatedTable) + ";";
+    return fDB(q);
+}
+
 class DBClass {
     constructor(table) {
         this._tableName = table;
@@ -245,6 +260,11 @@ class DBClass {
         if(arguments.length > 1 && Boolean(condition) && typeof fn === "function"){
             fn(this);
         }
+        return this;
+    }
+
+    with(relatedTable, relatedTableColumns = '*'){
+
         return this;
     }
 
@@ -576,4 +596,4 @@ Object.getOwnPropertyNames(DBClass)
 
 // console.log(Object.getOwnPropertyNames(DBClass));
 // exports.fDB=fDB;
-module.exports = {fDB, DB};
+module.exports = {fDB, getConstraint, DB};
