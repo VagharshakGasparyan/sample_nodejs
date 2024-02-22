@@ -10,7 +10,8 @@ async function api_auth(req, res, next) {
         res.locals.$api_auth[authData.role] = authData.auth;
         res.locals.$api_new_token = authData.newToken;
     }
-    res.locals.$api_local = req.headers['accept-language'] ?? conf.lang.default ?? null;
+    let allLangKeys = Object.keys(conf.lang.all ?? []);
+    res.locals.$api_local = allLangKeys.includes(req.headers['accept-language']) ? req.headers['accept-language'] : conf.lang.default ?? null;
     next();
 }
 module.exports = api_auth;

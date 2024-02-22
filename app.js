@@ -1,13 +1,22 @@
 const express = require('express');
 const app = express();
 const path = require('node:path');
+const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
-const cron = require('node-cron');
+// const cron = require('node-cron');
 require('dotenv').config();
 // require("./components/logger");
-const fs = require("node:fs");
+// const fs = require("node:fs");
+const {exec, spawn} = require("node:child_process");
 const fileUpload = require("express-fileupload");
+//---------------------------------------------------------------------------------
+console.log(">>>>>>>>>>started");
+//-------------------------------cors----------------------------------------------
+app.use(cors({
+    origin: '*',
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+}));
 //-------------------------------global functions----------------------------------
 require("./components/globalFunctions")(__dirname);
 //---------------------cron jobs-begin---------------------------------------------
@@ -20,6 +29,14 @@ app.set('view engine', 'ejs');
 //------------------set layouts----------------------------------------------------
 app.use(require('express-ejs-layouts'));
 app.set('layout', 'layouts/main');
+
+// app.use(function(req, res, next) {
+//     res.setHeader('Access-Control-Allow-Origin', '*');
+//     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+//     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+//     res.setHeader('Access-Control-Allow-Credentials', true);
+//     next();
+// });
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
