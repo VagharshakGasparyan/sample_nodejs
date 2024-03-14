@@ -263,7 +263,12 @@ class DBClass {
         return this;
     }
 
-    with(relatedTable, relatedTableColumns = '*'){
+    async with(relatedTable, relatedTableColumns = '*'){
+
+        let schemaData = await getConstraint(this._tableName, relatedTable);
+        let colName = schemaData[0]["COLUMN_NAME"];// 'category_id'
+        let refColName = schemaData[0]["REFERENCED_COLUMN_NAME"];//'id'
+
 
         return this;
     }
@@ -513,10 +518,29 @@ class DBClass {
                     let prefix = fromMethod === 'changeColumn' ? "ADD " : "";
                     let [referenceTable, referencePrimaryKey] = q_obj.foreign;
                     q_arr.push(", " + prefix + "CONSTRAINT " + _col("FK_" + tableName + "__" + referenceTable)
-                        + " FOREIGN KEY (" + _col(_column) + ") REFERENCES " + _col(referenceTable) + "(" + _col(referencePrimaryKey) + ")");
+                        + " FOREIGN KEY (" + _col(_column) + ") REFERENCES " + _col(referenceTable)
+                        + "(" + _col(referencePrimaryKey) + ") ON DELETE CASCADE");
                 }
                 if(q_obj.dropForeign){
+                    // let qDropForeignKeyByName = ";\n CREATE PROCEDURE IF NOT EXISTS DropForeignKeyByName(IN tableName VARCHAR(255), IN referencedTableName VARCHAR(255))\n" +
+                    //     "BEGIN\n" +
+                    //     "    DECLARE constraintName VARCHAR(255);\n" +
+                    //     "\n" +
+                    //     "    SELECT constraint_name INTO constraintName\n" +
+                    //     "    FROM information_schema.key_column_usage\n" +
+                    //     "    WHERE referenced_table_name = referencedTableName\n" +
+                    //     "    AND table_name = tableName\n" +
+                    //     "    LIMIT 1;\n" +
+                    //     "\n" +
+                    //     "    SET @sql = CONCAT('ALTER TABLE ', tableName, ' DROP FOREIGN KEY ', constraintName);\n" +
+                    //     "    PREPARE stmt FROM @sql;\n" +
+                    //     "    EXECUTE stmt;\n" +
+                    //     "    DEALLOCATE PREPARE stmt;\n" +
+                    //     "END;\n";
+                    // q_arr.push(qDropForeignKeyByName);
+                    // q_arr.push(" CALL DropForeignKeyByName(" + _val(tableName) + ", " + _val(q_obj.dropForeign) + ")");
                     q_arr.push(", DROP FOREIGN KEY " + _col("FK_" + tableName + "__" + q_obj.dropForeign));
+
                 }
                 if(q_obj.check){
                     q_arr.push(", " + q_obj.check);

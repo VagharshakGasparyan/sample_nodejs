@@ -13,8 +13,18 @@ class TmpCommand {
     static command = "tmp";
     async handle()
     {
+        // let changeColumn = await DB("persons").changeColumn(
+        //     DB.column("user_id").bigint().dropForeign('users')
+        // );
+        // console.log(changeColumn);
         let ans = await getConstraint('products', 'categories');
         console.log(ans);
+        // await DB('products').changeColumn(
+        //     DB.column('category_id').bigint().unsigned().dropForeign('categories')
+        // );
+        // await DB('products').changeColumn(
+        //     DB.column('category_id').bigint().unsigned().foreign('categories', 'id')
+        // );
     }
 }
 
