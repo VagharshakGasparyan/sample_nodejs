@@ -1,6 +1,7 @@
 const {DB} = require("../components/db");
-const table = "products";//change as you see fit․
-class ProductsMigration {
+const table = "categories";//change as you see fit․
+
+class CategoriesMigration {
     constructor() {
         //
     }
@@ -8,14 +9,7 @@ class ProductsMigration {
     async up() {
         await DB(table).createTable([
             DB.column('id').id(),
-            DB.column('category_id').bigint().unsigned().foreign('categories', 'id'),
-            DB.column('slug').varchar(255),
             DB.column('name').json().nullable(),
-            DB.column('title').json().nullable(),
-            DB.column('description').json().nullable(),
-            DB.column('image').varchar(255).nullable(),
-            DB.column('images').json().nullable(),
-            DB.column('active').tinyint().default(1),
             DB.column('created_at').timestamp().nullable(),
             DB.column('updated_at').timestamp().nullable(),
         ]);
@@ -35,4 +29,4 @@ class ProductsMigration {
     async down() {
         await DB(table).deleteTable();
     }
-}module.exports = ProductsMigration;
+}module.exports = CategoriesMigration;

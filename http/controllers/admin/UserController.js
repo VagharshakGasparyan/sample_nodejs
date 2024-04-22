@@ -1,4 +1,4 @@
-const {api_validate, unique} = require("../../../components/validate");
+const {api_validate, unique, VRequest} = require("../../../components/validate");
 const Joi = require("joi");
 const bcrypt = require("bcrypt");
 const {saveAndGetUserToken, apiLogoutUser, generateString} = require("../../../components/functions");
@@ -11,6 +11,8 @@ const UsersResource = require("../../resources/UsersResource");
 const moment = require("moment/moment");
 const fs = require('node:fs');
 const TeamsResource = require("../../resources/teamsResource");
+const SettingsResource = require("../../resources/settingsResource");
+const controllersAssistant = require("../../../components/controllersAssistant");
 
 class UserController {
 
@@ -43,6 +45,8 @@ class UserController {
 
     async login(req, res, next) {
         // console.log(req.body);
+        // eval("if(true){ return res.send({errors: 'valid_err'});}");
+        // new Function('if(true){return res.send({errors: \'valid_err\'});}')(res);
         let valid_err = api_validate({
             email: Joi.string().email().required(),
             password: Joi.string().min(6).max(30).required()
@@ -89,24 +93,19 @@ class UserController {
     }
 
     async create(req, res, next) {
-        let uniqueErr = await unique('users', 'email', req.body.email);
-        if(uniqueErr){
+        let errors = await new VRequest(req, res)
+            .key('password').min(6).max(30)
+            .key('role').min(2).max(15)
+            .key('first_name').required().min(2).max(50)
+            .key('last_name').required().min(2).max(50)
+            .key('email').required().unique('users', 'email').email()
+            .key('photo').image().max(5000000)
+            .validate();
+        if(errors){
             res.status(422);
-            return res.send({errors: {email: uniqueErr}});
+            return res.send({errors: errors});
         }
-        let valid_err = api_validate({
-            email: Joi.string().email().required(),
-            first_name: Joi.string().min(2).max(30).required(),
-            last_name: Joi.string().min(2).max(30).required(),
-            role: Joi.string().min(2).max(30),
-            password: Joi.string().min(6).max(30)
-        }, req, res);
-        // return res.send({tmp: 'ok'});
-        if (valid_err) {
-            res.status(422);
-            return res.send({errors: valid_err});
-        }
-        // return res.send({tmp: 'no valid error'});
+
         let message = null, generatedPassword = null;
         if (!req.body.role) {
             req.body.role = 'admin';
@@ -116,40 +115,22 @@ class UserController {
             message = 'User password generated automatically, it send to email.';
         }
 
-        let userPhoto = req.files ? req.files.photo : null;
-        let photo = null;
-        if (userPhoto) {
-            let imageName = md5(Date.now()) + generateString(4);
-            let ext = extFrom(userPhoto.mimetype, userPhoto.name);
-            if(ext.toLowerCase() !== ".png" && ext.toLowerCase() !== ".jpg"){
-                res.status(422);
-                return res.send({errors: 'file not a jpg or png.'});
-            }
-            // fs.copyFileSync(file.path, __basedir + '/public/images/qwerty.png');
-            let uploaded = saveFileContentToPublic('storage/uploads/users', imageName + ext, userPhoto.data);
-            if (!uploaded) {
-                res.status(422);
-                return res.send({errors: 'file not uploaded.'});
-            }
-            photo = 'storage/uploads/users/' + imageName + ext;
-        }
-        let newUserData = {
+        let newData = {
             first_name: req.body.first_name,
             last_name: req.body.last_name,
             email: req.body.email,
             email_verified_at: moment().format('yyyy-MM-DD HH:mm:ss'),
             role: req.body.role,
-            photo: photo,
             password: bcrypt.hashSync(req.body.password, 8),
             created_at: moment().format('yyyy-MM-DD HH:mm:ss'),
             updated_at: moment().format('yyyy-MM-DD HH:mm:ss'),
         }
 
         try {
-            let forId = await DB('users').create(newUserData);
-            newUserData.id = forId.insertId;
+            controllersAssistant.filesCreate(req, res, ['photo'], [], 'storage/uploads/users',newData, []);
+            let forId = await DB('users').create(newData);
+            newData.id = forId.insertId;
         }catch (e) {
-            console.error(e);
             res.status(422);
             return res.send({errors: 'User not created.'});
         }
@@ -159,7 +140,7 @@ class UserController {
             'Hello, You are registered in WebTop, your password: ' + req.body.password
         );
         let locale = res.locals.$api_local;
-        let user = await new UsersResource(newUserData, locale);
+        let user = await new UsersResource(newData, locale);
 
         return res.send({data: {user: user, message: message, generatedPassword}, errors: {}});
     }
@@ -171,43 +152,34 @@ class UserController {
             res.status(422);
             return res.send({errors: 'No user id parameter.'});
         }
-        let valid_err = api_validate({
-            email: Joi.string().email(),
-            first_name: Joi.string().min(2).max(30),
-            last_name: Joi.string().min(2).max(30),
-            role: Joi.string().min(2).max(30),
-            old_password: Joi.string().min(6).max(30),
-            new_password: Joi.string().min(6).max(30),
-        }, req, res);
-        if (valid_err) {
+        user = await DB('users').find(user_id);
+        if(!user){
             res.status(422);
-            return res.send({errors: valid_err});
+            return res.send({errors: "User with this id " + user_id + " can not found."});
         }
-        let {email, first_name, last_name, role, new_password, old_password} = req.body;
-        let updatedUserData = {};
+        let errors = await new VRequest(req, res)
+            .key('old_password').min(6).max(30)
+            .key('new_password').min(6).max(30)
+            .key('role').min(2).max(15)
+            .key('first_name').min(2).max(50)
+            .key('last_name').min(2).max(50)
+            .key('email').unique('users', 'email', user.email).email()
+            .key('photo').image().max(5000000)
+            .validate();
+        if(errors){
+            res.status(422);
+            return res.send({errors: errors});
+        }
+
+        let {new_password, old_password} = req.body;
+        let newData = {};
         try {
-            user = await DB('users').find(user_id);
-            if(!user){
-                res.status(422);
-                return res.send({errors: "User with this id " + user_id + " can not found."});
-            }
-            if(email){
-                let uniqueErr = await unique('users', 'email', email);
-                if(uniqueErr){
-                    res.status(422);
-                    return res.send({errors: {email: uniqueErr}});
+            ['email', 'first_name', 'last_name', 'role'].forEach((item)=>{
+                if(item in req.body){
+                    newData[item] = req.body[item];
                 }
-                updatedUserData.email = email;
-            }
-            if(first_name){
-                updatedUserData.first_name = first_name;
-            }
-            if(last_name){
-                updatedUserData.last_name = last_name;
-            }
-            if(role){
-                updatedUserData.role = role;
-            }
+            });
+
             if(new_password){
                 if(!old_password){
                     res.status(422);
@@ -217,46 +189,27 @@ class UserController {
                     res.status(422);
                     return res.send({errors: 'The old password is incorrect.'});
                 }
-                updatedUserData.password = bcrypt.hashSync(new_password, 8);
+                newData.password = bcrypt.hashSync(new_password, 8);
             }
-            let userPhoto = req.files ? req.files.photo : null;
-            if (userPhoto) {
-                let imageName = md5(Date.now()) + generateString(4);
-                let ext = extFrom(userPhoto.mimetype, userPhoto.name);
-                if(ext.toLowerCase() !== ".png" && ext.toLowerCase() !== ".jpg"){
-                    res.status(422);
-                    return res.send({errors: 'file not a jpg or png.'});
-                }
+            controllersAssistant.filesUpdate(req, res, ['photo'], [], 'storage/uploads/users', user, newData, []);
 
-                let uploaded = saveFileContentToPublic('storage/uploads/users', imageName + ext, userPhoto.data);
-                if (!uploaded) {
-                    res.status(422);
-                    return res.send({errors: 'Photo not uploaded.'});
-                }
-                if(user.photo){
-                    fs.unlinkSync(__basedir + "/public/" + user.photo);
-                }
-                updatedUserData.photo = 'storage/uploads/users/' + imageName + ext;
-            }
-
-            if(Object.keys(updatedUserData).length > 0){
-                updatedUserData.updated_at = moment().format('yyyy-MM-DD HH:mm:ss');
-                await DB('users').where("id", user_id).update(updatedUserData);
-            }else{
-                return res.send({message: 'Nothing to update.'});
+            if(Object.keys(newData).length > 0){
+                newData.updated_at = moment().format('yyyy-MM-DD HH:mm:ss');
+                await DB('users').where("id", user_id).update(newData);
             }
         }catch (e) {
             console.error(e);
             res.status(422);
             return res.send({errors: 'User not updated.'});
         }
-        for(let key in updatedUserData){
-            user[key] = updatedUserData[key];
+        for(let key in newData){
+            user[key] = newData[key];
         }
         let locale = res.locals.$api_local;
         user = await new UsersResource(user, locale);
         return res.send({data:{user}, message: "User data updated successfully.", errors: {}});
     }
+
     async destroy(req, res, next) {
         let {user_id} = req.params;
         if(!user_id){

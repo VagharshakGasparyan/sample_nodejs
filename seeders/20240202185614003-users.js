@@ -12,7 +12,7 @@ class UsersSeeder {
             {
                 first_name: 'Root',
                 last_name: 'Root',
-                email: 'root@sample.com',
+                email: 'root@webtop.com',
                 password: bcrypt.hashSync('12345678', 8),
                 email_verified_at: moment().format('yyyy-MM-DD HH:mm:ss'),
                 role: 'admin',
@@ -22,7 +22,7 @@ class UsersSeeder {
             {
                 first_name: 'User',
                 last_name: 'User',
-                email: 'user@sample.com',
+                email: 'user@webtop.com',
                 password: bcrypt.hashSync('12345678', 8),
                 email_verified_at: moment().format('yyyy-MM-DD HH:mm:ss'),
                 role: 'user',

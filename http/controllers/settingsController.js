@@ -8,6 +8,7 @@ const md5 = require("md5");
 const bcrypt = require("bcrypt");
 const moment = require("moment/moment");
 const SettingsResource = require("../resources/SettingsResource");
+const controllersAssistant = require("../../components/controllersAssistant");
 
 class SettingsController {
     constructor() {
@@ -28,51 +29,39 @@ class SettingsController {
         }
         let valid_err = api_validate({
             key: Joi.string().required(),
-            name: Joi.string().min(1).max(512),
-            description: Joi.string().min(1),
-            value: Joi.string().min(1)
+            name: Joi.string().min(1).max(512).required(),
         }, req, res);
         if (valid_err) {
             res.status(422);
             return res.send({errors: valid_err});
         }
         let message = null;
-
-        let settingFile = req.files ? req.files.file : null;
-        let fileName = null;
-        if (settingFile) {
-            fileName = md5(Date.now()) + generateString(4);
-            let ext = extFrom(settingFile.mimetype, settingFile.name);
-            let uploaded = saveFileContentToPublic('storage/uploads/settings', fileName + ext, settingFile.data);
-            if (!uploaded) {
-                res.status(422);
-                return res.send({errors: 'file not uploaded.'});
-            }
-            fileName = 'storage/uploads/settings/' + fileName + ext;
-        }
-        let newSettingsData = {};
+        let newData = {};
+        let errors = [];
         try {
-            newSettingsData = {
-                key: req.body.key,
-                name: req.body.name,
-                description: JSON.stringify({[locale]: req.body.description}),
-                value: req.body.value,
-                file: fileName,
-                created_at: moment().format('yyyy-MM-DD HH:mm:ss'),
-                updated_at: moment().format('yyyy-MM-DD HH:mm:ss'),
+            controllersAssistant.translateAblesCreate(req, res, ['description', 'title'], newData, errors);
+            controllersAssistant.filesCreate(req, res, ['file'], [], 'storage/uploads/settings', newData, errors);
+            if(errors.length){
+                res.status(422);
+                return res.send({errors: errors});
             }
+            newData.key = req.body.key;
+            newData.name = req.body.name;
+            newData.value = req.body.value;
+            newData.created_at = moment().format('yyyy-MM-DD HH:mm:ss');
+            newData.updated_at = moment().format('yyyy-MM-DD HH:mm:ss');
             if("active" in req.body){
-                newSettingsData.active = req.body.active;
+                newData.active = req.body.active;
             }
-            let forId = await DB('settings').create(newSettingsData);
-            newSettingsData.id = forId.insertId;
+            let forId = await DB('settings').create(newData);
+            newData.id = forId.insertId;
         }catch (e) {
             console.error(e);
             res.status(422);
             return res.send({errors: 'Setting not created.'});
         }
-        let setting = await new SettingsResource(newSettingsData, locale);
-        return res.send({data: {settings: setting, message: message}, errors: {}});
+        let setting = await new SettingsResource(newData, locale);
+        return res.send({data: {setting: setting, message: message}, errors: {}});
     }
 
     async store(req, res, next)
@@ -100,75 +89,56 @@ class SettingsController {
             return res.send({errors: 'No setting id parameter.'});
         }
         let locale = res.locals.$api_local;
-        let uniqueErr = await unique('settings', 'key', req.body.key);
-        if(uniqueErr){
-            res.status(422);
-            return res.send({errors: {key: uniqueErr}});
-        }
         let valid_err = api_validate({
             key: Joi.string(),
             name: Joi.string().min(1).max(512),
-            description: Joi.string().min(1),
-            value: Joi.string().min(1)
         }, req, res);
         if (valid_err) {
             res.status(422);
             return res.send({errors: valid_err});
         }
         let {key, name, description, value, active} = req.body;
-        let updatedSettingData = {};
+        let newData = {};
         try {
             setting = await DB('settings').find(setting_id);
             if(!setting){
                 res.status(422);
                 return res.send({errors: "Setting with this id " + setting_id + " can not found."});
             }
-            if(key){
-                updatedSettingData.key = key;
+            if(key && key !== setting.key){
+                let uniqueErr = await unique('settings', 'key', key);
+                if(uniqueErr){
+                    res.status(422);
+                    return res.send({errors: {key: uniqueErr}});
+                }
+                newData.key = key;
             }
             if(name){
-                updatedSettingData.name = name;
+                newData.name = name;
             }
-            if(description){
-                let oldDescription = setting.description ? JSON.parse(setting.description) : {};
-                oldDescription[locale] = description;
-                updatedSettingData.description = JSON.stringify(oldDescription);
-            }
+            //---------------------------------------------------------------------------------
+            let translatable = ['description', 'title'];
+            controllersAssistant.translateAblesUpdate(req, res, translatable, newData, setting);
+            //---------------------------------------------------------------------------------
             if(value){
-                updatedSettingData.value = value;
+                newData.value = value;
             }
             if("active" in req.body){
-                updatedSettingData.active = active;
+                newData.active = active;
             }
+            controllersAssistant.filesUpdate(req, res, ['file'], [], 'storage/uploads/settings', setting, newData, errors);
 
-            let settingFile = req.files ? req.files.file : null;
-            if (settingFile) {
-                let settingFileName = md5(Date.now()) + generateString(4);
-                let ext = extFrom(settingFile.mimetype, settingFile.name);
-                let uploaded = saveFileContentToPublic('storage/uploads/settings', settingFileName + ext, settingFile.data);
-                if (!uploaded) {
-                    errors.push('File not uploaded.');
-                }else{
-                    if(setting.file){
-                        fs.unlinkSync(__basedir + "/public/" + setting.file);
-                    }
-                    updatedSettingData.file = 'storage/uploads/settings/' + settingFileName + ext;
-                }
-            }
-
-            if(Object.keys(updatedSettingData).length > 0){
-                updatedSettingData.updated_at = moment().format('yyyy-MM-DD HH:mm:ss');
-                await DB('settings').where("id", setting_id).update(updatedSettingData);
-            }else{
-                return res.send({message: 'Nothing to update.'});
+            if(Object.keys(newData).length > 0){
+                newData.updated_at = moment().format('yyyy-MM-DD HH:mm:ss');
+                await DB('settings').where("id", setting_id).update(newData);
             }
         }catch (e) {
             console.error(e);
             res.status(422);
             return res.send({errors: 'Setting not updated.'});
         }
-        for(let key in updatedSettingData){
-            setting[key] = updatedSettingData[key];
+        for(let key in newData){
+            setting[key] = newData[key];
         }
         setting = await new SettingsResource(setting, locale);
         return res.send({data: {setting}, message: "Setting data updated successfully.", errors: errors});
@@ -202,7 +172,7 @@ class SettingsController {
             res.status(422);
             return res.send({errors: 'Setting not deleted.'});
         }
-        return res.send({message: "Setting with this id " + setting_id + " deleted successfully."});
+        return res.send({id: setting.id, message: "Setting with this id " + setting_id + " deleted successfully."});
     }
 
 }

@@ -1,17 +1,14 @@
 const {DB} = require("../components/db");
-const table = "categories";//change as you see fit․
-class CategoriesMigration {
+const table = "portfolio_category";//change as you see fit․
+class Portfolio_categoryMigration {
     constructor() {
         //
     }
 
     async up() {
         await DB(table).createTable([
-            DB.column('id').id(),
-            DB.column('name').json().nullable(),
-            DB.column('description').json().nullable(),
-            DB.column('created_at').timestamp().nullable(),
-            DB.column('updated_at').timestamp().nullable(),
+            DB.column('portfolio_id').bigint().unsigned().foreign('portfolio', 'id').onDeleteCascade(),
+            DB.column('category_id').bigint().unsigned().foreign('categories', 'id').onDeleteCascade()
         ]);
         /*Or can create*/
         /*
@@ -29,4 +26,4 @@ class CategoriesMigration {
     async down() {
         await DB(table).deleteTable();
     }
-}module.exports = CategoriesMigration;
+}module.exports = Portfolio_categoryMigration;

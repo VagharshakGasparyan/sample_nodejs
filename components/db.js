@@ -10,6 +10,8 @@ function _val(value) {
         return value ? 1 : 0;
     }else if(value === undefined){
         return '';
+    }else if(typeof value === 'string'){
+        return "'" + value.replace(/'/ig, "\\'") + "'";
     }
     return "'" + value + "'";
 }
@@ -67,7 +69,7 @@ function fDB(q) {
             if (err) {
                 reject(err);
             }
-            con.query(q, function (err, result) {
+            con.query(q, function (err, result, fields) {
                 if (err) {
                     reject(err);
                 }
@@ -76,21 +78,6 @@ function fDB(q) {
             con.end();
         });
     });
-}
-
-function getConstraint(table, relatedTable) {
-    let mode = process.env.NODE_ENV ?? "production";
-    let config = conf.database[mode];
-    let dbName = config.database;
-    let q = "SELECT RefCons.CONSTRAINT_SCHEMA, RefCons.TABLE_NAME, RefCons.REFERENCED_TABLE_NAME, RefCons.CONSTRAINT_NAME, KeyCol.COLUMN_NAME, KeyCol.REFERENCED_COLUMN_NAME\n"
-        + "FROM information_schema.referential_constraints RefCons\n"
-        + "JOIN information_schema.key_column_usage KeyCol ON RefCons.CONSTRAINT_SCHEMA = KeyCol.table_schema\n"
-        + "AND RefCons.TABLE_NAME = KeyCol.TABLE_NAME\n"
-        + "AND RefCons.CONSTRAINT_NAME = KeyCol.CONSTRAINT_NAME\n"
-        + "WHERE RefCons.CONSTRAINT_SCHEMA = " + _val(dbName)
-        +" AND RefCons.TABLE_NAME = " + _val(table)
-        +" AND RefCons.REFERENCED_TABLE_NAME = " + _val(relatedTable) + ";";
-    return fDB(q);
 }
 
 class DBClass {
@@ -260,16 +247,6 @@ class DBClass {
         if(arguments.length > 1 && Boolean(condition) && typeof fn === "function"){
             fn(this);
         }
-        return this;
-    }
-
-    async with(relatedTable, relatedTableColumns = '*'){
-
-        let schemaData = await getConstraint(this._tableName, relatedTable);
-        let colName = schemaData[0]["COLUMN_NAME"];// 'category_id'
-        let refColName = schemaData[0]["REFERENCED_COLUMN_NAME"];//'id'
-
-
         return this;
     }
 
@@ -472,6 +449,14 @@ class DBClass {
                 q_obj.foreign = [referenceTable, referencePrimaryKey];
                 return secondary;
             },
+            onDeleteCascade: function () {
+                q_obj.on_delete = "ON DELETE CASCADE";
+                return secondary;
+            },
+            onDeleteSetNull: function () {
+                q_obj.on_delete = "ON DELETE SET NULL";
+                return secondary;
+            },
             dropForeign: function (referenceTable) {
                 q_obj.dropForeign = referenceTable;
                 return secondary;
@@ -519,28 +504,13 @@ class DBClass {
                     let [referenceTable, referencePrimaryKey] = q_obj.foreign;
                     q_arr.push(", " + prefix + "CONSTRAINT " + _col("FK_" + tableName + "__" + referenceTable)
                         + " FOREIGN KEY (" + _col(_column) + ") REFERENCES " + _col(referenceTable)
-                        + "(" + _col(referencePrimaryKey) + ") ON DELETE CASCADE");
+                        + "(" + _col(referencePrimaryKey) + ")");//ON DELETE SET NULL
+                }
+                if(q_obj.on_delete){
+                    q_arr.push(q_obj.on_delete);
                 }
                 if(q_obj.dropForeign){
-                    // let qDropForeignKeyByName = ";\n CREATE PROCEDURE IF NOT EXISTS DropForeignKeyByName(IN tableName VARCHAR(255), IN referencedTableName VARCHAR(255))\n" +
-                    //     "BEGIN\n" +
-                    //     "    DECLARE constraintName VARCHAR(255);\n" +
-                    //     "\n" +
-                    //     "    SELECT constraint_name INTO constraintName\n" +
-                    //     "    FROM information_schema.key_column_usage\n" +
-                    //     "    WHERE referenced_table_name = referencedTableName\n" +
-                    //     "    AND table_name = tableName\n" +
-                    //     "    LIMIT 1;\n" +
-                    //     "\n" +
-                    //     "    SET @sql = CONCAT('ALTER TABLE ', tableName, ' DROP FOREIGN KEY ', constraintName);\n" +
-                    //     "    PREPARE stmt FROM @sql;\n" +
-                    //     "    EXECUTE stmt;\n" +
-                    //     "    DEALLOCATE PREPARE stmt;\n" +
-                    //     "END;\n";
-                    // q_arr.push(qDropForeignKeyByName);
-                    // q_arr.push(" CALL DropForeignKeyByName(" + _val(tableName) + ", " + _val(q_obj.dropForeign) + ")");
                     q_arr.push(", DROP FOREIGN KEY " + _col("FK_" + tableName + "__" + q_obj.dropForeign));
-
                 }
                 if(q_obj.check){
                     q_arr.push(", " + q_obj.check);
@@ -620,4 +590,4 @@ Object.getOwnPropertyNames(DBClass)
 
 // console.log(Object.getOwnPropertyNames(DBClass));
 // exports.fDB=fDB;
-module.exports = {fDB, getConstraint, DB};
+module.exports = {fDB, DB};
