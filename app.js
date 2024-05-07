@@ -10,6 +10,49 @@ require('dotenv').config();
 // const fs = require("node:fs");
 const {exec, spawn} = require("node:child_process");
 const fileUpload = require("express-fileupload");
+//-------------------MongoDB-------------------------------------------------------
+const { MongoClient } = require('mongodb');
+const client = new MongoClient('mongodb://localhost:27017');
+const db = client.db('test_db');
+const users = db.collection('users');
+const products = db.collection('products');
+(async ()=>{
+    let ans = await users.find({email: "vvagharshak@gmail.com"}).toArray();
+    console.log(ans);
+    // await users.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }]);
+    // await products.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }]);
+
+    // await db.createCollection('tickets', {
+    //     clusteredIndex: { "key": { _id: 1 }, "unique": true, "name": "stocks clustered key" }
+    // });
+    // await products.insertMany([
+    //     { "_id": 1, "name": "apples", "qty": 5, "rating": 3 },
+    //     { "_id": 2, "name": "bananas", "qty": 7, "rating": 1 },
+    //     { "_id": 3, "name": "oranges", "qty": 6, "rating": 2 },
+    //     { "_id": 4, "name": "avocados", "qty": 3, "rating": 5 },
+    // ]);
+    // const deleteResult = await users.deleteMany({ email: "vvagharshak@gmail.com" });
+    // console.log('Deleted documents =>', deleteResult);
+})();
+
+//client.close();
+const mongoose = require('mongoose');
+try {
+    (async ()=>{
+        const db = await mongoose.connect('mongodb://127.0.0.1:27017/test_db');
+        console.log('Mongo DB Connected!');
+        // let f =  await User.find({email:"vvagharshak@gmail.com"});
+        // console.log(f);
+        // await db.mquery.createCollection("posts");
+        // let ans = await db.users.find({email: "vvagharshak@gmail.com"});
+        // console.log(db);
+    })();
+}catch (e) {
+    console.log('Mongo DB Connection error.', e);
+}
+// mongoose.connect('mongodb://127.0.0.1:27017/test_db')
+//     .then(() => console.log('Mongo DB Connected!'));
+
 //---------------------------------------------------------------------------------
 // console.log(">>>>>>>>>>started");
 //-------------------------------cors----------------------------------------------
