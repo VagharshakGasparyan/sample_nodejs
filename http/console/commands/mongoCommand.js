@@ -12,53 +12,17 @@ class MongoCommand {
     static command = "mongo";
     async handle()
     {
-        // console.log(this.args);
-        console.log('mongo command');
         let users = mdb.collection('users');
+        // await users.createIndex({name: "text"});
         try {
-            await mdb.createCollection("posts", {
-                validator: {
-                    $jsonSchema: {
-                        bsonType: "object",
-                        required: [ "title", "body" ],
-                        properties: {
-                            title: {
-                                bsonType: "string",
-                                description: "Title of post - Required."
-                            },
-                            body: {
-                                bsonType: "string",
-                                description: "Body of post - Required."
-                            },
-                            category: {
-                                bsonType: "string",
-                                description: "Category of post - Optional."
-                            },
-                            likes: {
-                                bsonType: "int",
-                                description: "Post like count. Must be an integer - Optional."
-                            },
-                            tags: {
-                                bsonType: ["string"],
-                                description: "Must be an array of strings - Optional."
-                            },
-                            date: {
-                                bsonType: "date",
-                                description: "Must be a date - Optional."
-                            }
-                        }
-                    }
-                }
-            });
-            // let a = await users.insertOne({
-            //     name: "Pablo1",
-            //     surname: "Picasso1"
-            // });
-            // console.log('a=', a);
-            // let l = await mdb.collection("posts1");
-            // console.log(mdb);
-            // let ans = await mdb.createCollection("posts", {capped: true});
+            // let ans = await users.find({$text: {$search: "%pablo%"}}).project({_id: 0, name: 1, surname: 1});
+            let ans = await users.find({name: {$regex: 'pablo', $options: 'i'}}).project({_id: 0, name: 1, surname: 1});
+            for await (const doc of ans) {
+                console.log(doc);
+            }
+            // let ans1 = await users.findOne({}, {projection: {_id: 0, name: 1, surname: 1}});
             // console.log(ans);
+            // console.log(ans1);
         }catch (e) {
             console.log('===============================ERROR================================');
             console.log(e);

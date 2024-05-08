@@ -11,7 +11,7 @@ function _val(value) {
     }else if(value === undefined){
         return '';
     }else if(typeof value === 'string'){
-        return "'" + value.replace(/'/ig, "\\'") + "'";
+        return "'" + value.replace(/\\/ig, '\\\\').replace(/'/ig, "\\'") + "'";
     }
     return "'" + value + "'";
 }
