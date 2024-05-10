@@ -19,7 +19,12 @@ await users.insertMany([
 await coll.findOne({ name: 'Pablo' });//{ name: 'Pablo', surname: 'Picasso', ... } | null
 [{ name: 'Pablo', surname: 'Picasso', ... }] | [] <≡> await coll.find({ name: 'Pablo' }).toArray();
 coll.find().limit(2);
+coll.find().sort({ year: 1});
+coll.find().project({ _id: 0, year: 1, imdb: 1 });
 coll.find({ title: { $regex: /^Rocky/} }, { skip: 2 });
+await coll.createIndex({ title: 1, year: -1 });
+// only searches fields with text indexes
+coll.find({ $text: { $search: 'zissou' } });
 await users.countDocuments({ name: 'Pablo' });
 
 await users.updateOne(
