@@ -1,0 +1,35 @@
+const { MongoClient } = require('mongodb');
+const client = new MongoClient('mongodb://localhost:27017');
+const mdb = client.db('test_db');
+
+let dbName = mdb.databaseName;
+let dbOptions = mdb.options;
+await mdb.dropDatabase();//true|false
+
+let collection = await mdb.createCollection("users");
+await mdb.listCollections({name: 'users'}, {nameOnly: true}).toArray();//[{name: "users", type: "collection"}, {...}]
+await mdb.listCollections({}, {nameOnly: true}).toArray();
+
+await users.insertOne({name:"Pablo", surname:"Picasso"});
+await users.insertMany([
+    {name:"John", surname:"Doe"},
+    {name:"Zako", surname:"Zuko"}
+]);
+
+await coll.findOne({ name: 'Pablo' });//{ name: 'Pablo', surname: 'Picasso', ... } | null
+[{ name: 'Pablo', surname: 'Picasso', ... }] | [] <≡> await coll.find({ name: 'Pablo' }).toArray();
+coll.find().limit(2);
+coll.find({ title: { $regex: /^Rocky/} }, { skip: 2 });
+await users.countDocuments({ name: 'Pablo' });
+
+await users.updateOne(
+    { name: 'Zako' },
+    { $set: { name: 'Zeozako' } }
+);
+await users.updateOne({name: 'Zakoko'}, { $set: { likes: 1 } }, { upsert: true });
+
+await users.updateMany({}, { $inc: { likes: 1 } });
+
+
+await users.deleteOne({ title: 'Congo' });
+await users.deleteMany({ name: { $regex: /^Pablo.*/ } });
