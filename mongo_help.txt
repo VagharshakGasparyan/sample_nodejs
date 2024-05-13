@@ -22,6 +22,7 @@ coll.find().limit(2);
 coll.find().sort({ year: 1});
 coll.find().project({ _id: 0, year: 1, imdb: 1 });
 coll.find({ title: { $regex: /^Rocky/} }, { skip: 2 });
+const distinctValues = await users.distinct("name", {});//[ 'John', 'Zakoko', 'Zeozako' ]
 await coll.createIndex({ title: 1, year: -1 });
 // only searches fields with text indexes
 coll.find({ $text: { $search: 'zissou' } });
@@ -31,10 +32,56 @@ await users.updateOne(
     { name: 'Zako' },
     { $set: { name: 'Zeozako' } }
 );
-await users.updateOne({name: 'Zakoko'}, { $set: { likes: 1 } }, { upsert: true });
+await users.updateOne({name: 'Zakoko'}, { $set: { likes: 1 } }, { upsert: true });//upsert: update or create
 
 await users.updateMany({}, { $inc: { likes: 1 } });
 
 
 await users.deleteOne({ title: 'Congo' });
 await users.deleteMany({ name: { $regex: /^Pablo.*/ } });
+
+$set: {}
+$currentDate
+$inc
+$unset
+$rename
+$sort: { score: -1|1 }//asc or desc
+$push
+$pull//remove from array
+$pop:-1|1//remove from array first or last
+$each
+$slice
+
+
+$eq: == Values are equal
+$ne: != Values are not equal
+$gt: > Value is greater than another value
+$gte: >= Value is greater than or equal to another value
+$lt: < Value is less than another value
+$lte: <= Value is less than or equal to another value
+$in: ['a', 'b', 'c'] Value is matched within an array
+$nin:
+$exists: true|false
+$type: "array"|[type1, type2, ...]
+db.collection.updateOne(
+   { <array>: value ... },
+   { <update operator>: { "<array>.$" : value } }
+)
+db.collection.updateOne(
+   { <query conditions> },
+   { <update operator>: { "<array>.$[]" : value } }
+)
+db.collection.updateMany(
+   { <query selector> },
+   { <update operator>: { "array.$[<identifier>].field" : value } },
+   { arrayFilters: [ { <identifier>: <condition> } } ] }
+)
+
+$and: Returns documents where both queries match
+$or: Returns documents where either query matches
+$nor: Returns documents where both queries fail to match
+$not: Returns documents where the query does not match
+
+$regex: Allows the use of regular expressions when evaluating field values
+$text: Performs a text search
+$where: Uses a JavaScript expression to match documents

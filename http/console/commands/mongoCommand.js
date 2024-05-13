@@ -60,31 +60,9 @@ await users.deleteOne({ title: 'Congo' });
         //<≡>
         try {
             let users = mdb.collection('users');
-            // await users.updateOne(
-            //     { name: 'Zako' },
-            //     { $set: { name: 'Zeozako' } }
-            // );
-            // await users.updateMany({}, { $set: { likes: 1 } });
-            console.log(await users.countDocuments({name: undefined}));
-            // await users.updateOne({name: 'Zakoko'}, { $set: { likes: 1 } }, { upsert: true });
-            // console.log(await users.findOne({ name: 'Pabloho' }));
-            // console.log(await users.find({ name: 'Pablo' }).toArray());
-            // for(let i = 0; i < 10; i++){
-            //     await users.insertOne({name: "Pablo" + i, surname: "Picasso" + i});
-            // }
-
-            // await users.insertMany([
-            //     {name:"John", surname:"Doe"},
-            //     {name:"Zako", surname:"Zuko"}
-            // ]);
-        //     // let ans = await users.find({$text: {$search: "%pablo%"}}).project({_id: 0, name: 1, surname: 1});
-        //     let ans = await users.find({name: {$regex: 'pablo', $options: 'i'}}).project({_id: 0, name: 1, surname: 1});
-        //     for await (const doc of ans) {
-        //         console.log(doc);
-        //     }
-            // let ans1 = await users.findOne({}, {projection: {_id: 0, name: 1, surname: 1}});
-            // console.log(ans);
-            // console.log(ans1);
+            // let ans = await users.find({name:{$in:['John', 'Zakoko']}}).toArray();
+            let ans = await users.updateOne({name: "John"}, {$rename:{"likes":"tmbrd"}});
+            console.log(ans);
         }catch (e) {
             console.log('===============================ERROR================================');
             console.log(e);
