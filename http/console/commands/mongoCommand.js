@@ -1,8 +1,11 @@
 const {DB} = require("../../../components/db");
 const bcrypt = require("bcrypt");
 const moment = require("moment/moment");
-const { UUID } = require('bson');
-const { MongoClient } = require('mongodb');
+const {UUID} = require('bson');
+const {MongoClient} = require('mongodb');
+// MongoClient.connect("mongodb://localhost:2701/test_db", (err, db)=>{}).then();
+const uri = "mongodb://username:password@localhost:27017/exampleDatabase";
+// const client = new MongoClient('mongodb://localhost:27017');
 const client = new MongoClient('mongodb://localhost:27017');
 //await client.close();
 const mdb = client.db('test_db');
@@ -12,9 +15,17 @@ class MongoCommand {
     constructor(args = []) {
         this.args = args;
     }
+
     static command = "mongo";
-    async handle()
-    {
+
+    sleep(t) {
+        return new Promise((resolve)=>{
+            setTimeout(resolve, t);
+        });
+    }
+
+    async handle() {
+        //\OSPanel\userdata\config/MongoDB-6.0-Win10.conf    replication.replSetName: "rs0"
         /*
 let dbName = mdb.databaseName;
 let dbOptions = mdb.options;
@@ -40,7 +51,6 @@ await users.deleteOne({ title: 'Congo' });
 // await mdb.collection('users').deleteMany({ name: { $regex: /^Pablo.*/ } });
 
 
-
         // const result = await mdb.collection("users").insertOne({});
         // await mdb.dropCollection('users');
         // client.close()
@@ -59,18 +69,42 @@ await users.deleteOne({ title: 'Congo' });
         // // await users.createIndex({name: "text"});
         //<≡>
         try {
-            let users = mdb.collection('users');
+            // let users = mdb.collection('users');
+            // await users.insertMany([
+            //     {name:"Valod", surname:"Valabekyan"},
+            //     {name:"Aram", surname:"Aramyan"}
+            // ]);
+            // let createdDB = await mdb.createCollection("addresses");
+            let list = await mdb.listCollections({}, {nameOnly: true}).toArray();
+            console.log(list);
+            // const result = await mdb.collection("categories").insertOne({});
             // let ans = await users.find({name:{$in:['John', 'Zakoko']}}).toArray();
-            let ans = await users.updateOne({name: "John"}, {$rename:{"likes":"tmbrd"}});
-            console.log(ans);
-        }catch (e) {
+            // let ans = await users.updateOne({name: "John"}, {$rename:{"likes":"tmbrd"}});
+            // console.log(ans);
+        } catch (e) {
             console.log('===============================ERROR================================');
             console.log(e);
+        }finally {
+            console.log("fff");
+        }
+        const session = client.startSession();
+        try {
+            session.startTransaction();
+            let users = mdb.collection('users');
+            await users.insertMany([
+                {name: "Valod", surname: "Valabekyan"},
+                {name: "Aram", surname: "Aramyan"}
+            ], {session});
+            await session.commitTransaction();
+        } catch (e) {
+            await session.abortTransaction();
+            console.log("error ka, error", e);
+        } finally {
+            await session.endSession();
+            console.log("finally ka, finally");
         }
 
-
-
-
+        console.log("handle end");
     }
 }
 
